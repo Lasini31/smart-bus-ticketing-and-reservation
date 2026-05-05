@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
+import PaymentPage from './pages/PaymentPage.jsx'
 
 import React, { Suspense } from 'react'
 import {
@@ -29,6 +30,10 @@ const router = createBrowserRouter(createRoutesFromElements(
           index
           element={<Home/>}
         />
+      <Route
+          path='payment'
+          element={<PaymentPage/>}
+          />
     </Route>
   </>
 ));
