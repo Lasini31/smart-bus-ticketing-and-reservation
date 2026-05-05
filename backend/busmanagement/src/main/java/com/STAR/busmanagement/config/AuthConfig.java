@@ -10,6 +10,8 @@ public class AuthConfig {
     @Value("${app.auth.mock}")
     private boolean mock;
 
+    //This acts as a runtime flag to determine which implementation to inject (Dependency injection)
+
     @Bean
     public AuthService authService(
             MockAuthService mockService,
