@@ -13,11 +13,12 @@ import {
 //import Loader from './loader.jsx'
 
 // Public imports
-import App from './App.jsx'
 //import AppWrapper from './AppWrapper'
-import Home from './components/home.jsx'
-//import Error from './erorr.jsx'
+// //import Error from './erorr.jsx'
 //import NotFound from './notFound.jsx'
+import App from './App.jsx'
+import Home from './components/home.jsx'
+import TicketBooking from './components/ticketBooking.jsx'
 
 // Admin imports goes here
 
@@ -28,6 +29,10 @@ const router = createBrowserRouter(createRoutesFromElements(
       <Route
           index
           element={<Home/>}
+        />
+      <Route
+          path='booking'
+          element={<TicketBooking/>}
         />
     </Route>
   </>
