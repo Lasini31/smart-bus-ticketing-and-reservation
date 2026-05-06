@@ -1,0 +1,76 @@
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+
+import React, { Suspense } from 'react'
+import {
+  createBrowserRouter,
+  createRoutesFromElements,
+  Route,
+  RouterProvider
+} from 'react-router-dom'
+
+//import Loader from './loader.jsx'
+
+// Public imports
+//import AppWrapper from './AppWrapper'
+// //import Error from './erorr.jsx'
+//import NotFound from './notFound.jsx'
+import App from './App.jsx'
+import Home from './components/home.jsx'
+import TicketBooking from './components/ticketBooking.jsx'
+import Wallet from './components/wallet.jsx'
+
+// Admin imports goes here
+
+const router = createBrowserRouter(createRoutesFromElements(
+  <>
+    {/* Public Routes */}
+    <Route path='/' element={<App />} > {/*errorElement={<Error />}*/} 
+      <Route
+          index
+          element={<Home/>}
+        />
+      <Route
+          path='booking'
+          element={<TicketBooking/>}
+        />
+      <Route
+          path='wallet'
+          element={<Wallet/>}
+        />
+    </Route>
+  </>
+));
+
+/*example 
+<Route
+  path='posts'
+  element={<Posts/>}
+  loader={PostLoader}
+  errorElement={<Error />}
+/>
+
+after add loader
+<Route element={<AppWrapper/>} >
+        <Route
+          index
+          element={<Home/>}
+        />
+      </Route>
+
+*/
+
+
+function Index() {
+  return (
+    <RouterProvider router={router} />
+  )
+}
+
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <Index />
+  </StrictMode>,
+)
