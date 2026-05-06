@@ -27,36 +27,24 @@ export default function TicketCard({ ticket, travelers }) {
               <p className="text-sm text-gray-800 font-semibold">{ticket.to}</p>
             </div>
           </div>
-          {/* Available Seats */}
-          <p className="text-xs text-gray-600 mt-2 mb-2">Available Seats: <span className="font-bold text-gray-800">{ticket.seatsAvailable}</span></p>
         </div>
 
         {/* Dotted Divider */}
-        <div className="border-l-2 border-dotted border-gray-300 h-26"></div>
+        <div className="border-l-2 border-dotted border-gray-300 h-16"></div>
 
         {/* Right Side - Time, Button, Price */}
         <div className="flex-1 flex flex-col items-center justify-center">
           {/* Time */}
-          <p className="text-2xl font-bold text-black mb-2">{ticket.time}</p>
-
+          <p className="text-2xl font-bold text-green-600 mb-2">{ticket.time}</p>
 
           {/* Buy Ticket Button */}
-          <button 
-            disabled={travelers > ticket.seatsAvailable}
-            className={`font-bold py-1.5 px-5 rounded-full transition mb-2 text-sm ${
-              travelers > ticket.seatsAvailable
-                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                : 'bg-green-600 hover:bg-green-700 text-white'
-            }`}
-          >
-            {travelers > ticket.seatsAvailable ? 'Buy Ticket' : 'Buy Ticket'}
+          <button className="bg-green-600 hover:bg-green-700 text-white font-bold py-1.5 px-5 rounded-full transition mb-2 text-sm">
+            Buy Ticket
           </button>
 
           {/* Price */}
-          <p className="text-xs text-gray-600">Price/Seat:</p>
-          <p className="text-sm font-bold text-red-600">Rs {ticket.pricePerSeat}</p>
-          <p className="text-xs text-gray-600 mt-1">Total ({travelers}):</p>
-          <p className="text-sm font-bold text-green-600">Rs {(ticket.pricePerSeat * travelers).toFixed(2)}</p>
+          <p className="text-xs text-gray-600">Price:</p>
+          <p className="text-sm font-bold text-red-600">{ticket.price}</p>
         </div>
       </div>
     </div>
