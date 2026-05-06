@@ -1,13 +1,13 @@
 server:
-  port: 8080
+  port: 8081
 
 spring:
   security:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: https://YOUR_PROJECT.supabase.co/auth/v1/keys
+          jwk-set-uri: https://rpbufjokybeukqcdfumq.supabase.co/auth/v1/keys
 
 app:
   auth:
-    mock: true
+    mock: false
