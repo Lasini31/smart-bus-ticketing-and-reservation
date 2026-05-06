@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import getOnBus from '../../public/icons/getOnBus.png'
-import getOutBus from '../../public/icons/getOutBus.png'
 
 const PLACES = [
   'Colombo',
@@ -39,17 +37,9 @@ export default function TicketSearch({ onSearch }) {
     });
   };
 
-  // Swap locations
-  const handleSwap = () => {
-    const temp = from;
-    setFrom(to);
-    setTo(temp);
-    onSearch({
-      from: to.toLowerCase(),
-      to: temp.toLowerCase(),
-      startDate,
-      travelers
-    });
+  // Trigger search on every input change
+  const handleInputChange = () => {
+    handleSearch();
   };
 
   // Handle From location input with suggestions
@@ -122,155 +112,130 @@ export default function TicketSearch({ onSearch }) {
 
   return (
     <div className="mb-8">
-      <div className="flex flex-col md:flex-row gap-4">
-        
-        {/* Section 1: Select Locations */}
-        <div className="flex-1 bg-white shadow-lg pl-6 pr-6 pt-2 pb-2 rounded-lg">
-          <div className="flex flex-col md:flex-row items-end gap-3">
-            {/* From Location */}
-            <div className="flex-1 w-full md:w-auto">
-              <div className="relative">
-                <label className="block text-xs font-semibold text-gray-600 mb-2 uppercase">From</label>
-                <div className="flex items-center border-b-2 border-gray-300 pb-2">
-                  <img src={getOnBus} className='w-8 h-8 mr-2'/>
-                  <input
-                    type="text"
-                    value={from}
-                    onChange={(e) => handleFromChange(e.target.value)}
-                    onFocus={() => from.length > 0 && setShowFromSuggestions(true)}
-                    placeholder="Select location"
-                    className="w-full outline-none text-sm font-medium"
-                    autoComplete="off"
-                  />
-                </div>
-                {showFromSuggestions && fromSuggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 bg-white border-b border-gray-300 mt-1 shadow-lg z-10 rounded">
-                    {fromSuggestions.map((place, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => selectFromPlace(place)}
-                        className="w-full text-left px-3 py-2 hover:bg-green-100 text-sm text-gray-700 border-b last:border-b-0 transition"
-                      >
-                        📍 {place}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+        {/* From Location */}
+        <div className='bg-white shadow-md p-2 rounded-lg'>
+          <div className="relative">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              From
+            </label>
+            <div className="flex items-center border-2 border-gray-300 rounded-lg px-3 py-2">
+              <span className="text-gray-400 mr-2">📍</span>
+              <input
+                type="text"
+                value={from}
+                onChange={(e) => handleFromChange(e.target.value)}
+                onFocus={() => from.length > 0 && setShowFromSuggestions(true)}
+                placeholder="From location"
+                className="w-full outline-none text-sm"
+                autoComplete="off"
+              />
             </div>
-
-            {/* Swap Button */}
-            <button
-              onClick={handleSwap}
-              className="bg-white border-2 border-gray-300 rounded-full p-3 hover:bg-gray-50 transition flex-shrink-0 self-center md:self-auto"
-              title="Swap locations"
-            >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m0 0l4 4m10-4v12m0 0l4-4m0 0l-4-4" />
-              </svg>
-            </button>
-
-            {/* To Location */}
-            <div className="flex-1 w-full md:w-auto">
-              <div className="relative">
-                <label className="block text-xs font-semibold text-gray-600 mb-2 uppercase">To</label>
-                <div className="flex items-center border-b-2 border-gray-300 pb-2">
-                  <img src={getOutBus} className='w-8 h-8 mr-2'/>
-                  <input
-                    type="text"
-                    value={to}
-                    onChange={(e) => handleToChange(e.target.value)}
-                    onFocus={() => to.length > 0 && setShowToSuggestions(true)}
-                    placeholder="Select location"
-                    className="w-full outline-none text-sm font-medium"
-                    autoComplete="off"
-                  />
-                </div>
-                {showToSuggestions && toSuggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 bg-white border-b border-gray-300 mt-1 shadow-lg z-10 rounded">
-                    {toSuggestions.map((place, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => selectToPlace(place)}
-                        className="w-full text-left px-3 py-2 hover:bg-green-100 text-sm text-gray-700 border-b last:border-b-0 transition"
-                      >
-                        📍 {place}
-                      </button>
-                    ))}
-                  </div>
-                )}
+            {showFromSuggestions && fromSuggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 bg-white border-2 border-gray-300 rounded-lg mt-1 shadow-lg z-10">
+                {fromSuggestions.map((place, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => selectFromPlace(place)}
+                    className="w-full text-left px-3 py-2 hover:bg-green-100 text-sm text-gray-700 border-b last:border-b-0 transition"
+                  >
+                    📍 {place}
+                  </button>
+                ))}
               </div>
-            </div>
+            )}
           </div>
         </div>
 
-        {/* Section 2: Select Date */}
-        <div className="flex-1 bg-white shadow-lg pl-6 pr-6 pt-2 pb-2 rounded-lg">
-          <label className="block text-xs font-semibold text-gray-600 mb-3 uppercase">Select Date</label>
-          <div className="flex items-center border-b-2 border-gray-300 pb-2">
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => {
-                setStartDate(e.target.value);
-                handleSearch();
-              }}
-              className="w-full outline-none text-sm font-medium"
-            />
+        {/* To Location */}
+        <div className='bg-white shadow-md p-2 rounded-lg'>
+          <div className="relative">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              To
+            </label>
+            <div className="flex items-center border-2 border-gray-300 rounded-lg px-3 py-2">
+              <span className="text-gray-400 mr-2">📍</span>
+              <input
+                type="text"
+                value={to}
+                onChange={(e) => handleToChange(e.target.value)}
+                onFocus={() => to.length > 0 && setShowToSuggestions(true)}
+                placeholder="To location"
+                className="w-full outline-none text-sm"
+                autoComplete="off"
+              />
+            </div>
+            {showToSuggestions && toSuggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 bg-white border-2 border-gray-300 rounded-lg mt-1 shadow-lg z-10">
+                {toSuggestions.map((place, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => selectToPlace(place)}
+                    className="w-full text-left px-3 py-2 hover:bg-green-100 text-sm text-gray-700 border-b last:border-b-0 transition"
+                  >
+                    📍 {place}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Section 3: Set Travelers */}
-        <div className="flex-1 bg-white shadow-lg pl-6 pr-6 pt-2 pb-2 rounded-lg">
-          <label className="block text-xs font-semibold text-gray-600 mb-3 uppercase">Number of Travelers</label>
-          <div className="flex items-center gap-4 pb-2 ">
-            <input
-              type="number"
-              value={travelers}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value === '') {
-                  setTravelers('');
-                  return;
-                }
-                if (isNaN(value)) return;
-                const newTravelers = Math.min(10, Math.max(1, parseInt(value)));
-                setTravelers(newTravelers);
-                handleSearch(newTravelers);
-              }}
-              onBlur={() => {
-                if (travelers === '' || travelers < 1) {
-                  setTravelers(1);
-                  handleSearch(1);
-                }
-              }}
-              className="w-35 text-center outline-none font-bold text-lg border-b-2 border-gray-300"
-              min="1"
-              max="10"
-            />
+        {/* Start Date */}
+        <div className='bg-white shadow-md p-2 rounded-lg'>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Start Date
+          </label>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => {
+              setStartDate(e.target.value);
+              handleSearch();
+            }}
+            className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 outline-none text-sm"
+          />
+        </div>
+
+        {/* Travelers */}
+        <div className='bg-white shadow-md p-2 rounded-lg'>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Travelers
+          </label>
+          <div className="flex items-center border-2 border-gray-300 rounded-lg px-3 py-2">
             <button
               onClick={() => {
                 const newTravelers = Math.max(1, travelers - 1);
                 setTravelers(newTravelers);
                 handleSearch(newTravelers);
               }}
-              className="flex-shrink-0 bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold w-10 h-10 rounded-full flex items-center justify-center transition text-lg"
+              className="text-gray-500 hover:text-gray-700 font-bold"
             >
               −
             </button>
-            <button
-              onClick={() => {
-                const newTravelers = Math.min(10, travelers + 1);
+            <input
+              type="number"
+              value={travelers}
+              onChange={(e) => {
+                const newTravelers = Math.max(1, parseInt(e.target.value) || 1);
                 setTravelers(newTravelers);
                 handleSearch(newTravelers);
               }}
-              className="flex-shrink-0 bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold w-10 h-10 rounded-full flex items-center justify-center transition text-lg"
+              className="w-full text-center outline-none mx-2"
+              min="1"
+            />
+            <button
+              onClick={() => {
+                const newTravelers = travelers + 1;
+                setTravelers(newTravelers);
+                handleSearch(newTravelers);
+              }}
+              className="text-gray-500 hover:text-gray-700 font-bold"
             >
               +
             </button>
           </div>
         </div>
-
       </div>
 
       {/* Clear Filters */}
@@ -287,7 +252,7 @@ export default function TicketSearch({ onSearch }) {
             travelers: 1
           });
         }}
-        className="mt-6 text-green-600 hover:text-green-700 font-semibold text-sm"
+        className="mt-4 text-green-600 hover:text-green-700 font-semibold text-sm"
       >
         Clear Filters
       </button>
