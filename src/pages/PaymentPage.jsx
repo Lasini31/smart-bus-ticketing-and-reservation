@@ -1,6 +1,7 @@
 import { useState } from "react";
 import PersonalDetailsForm from '../components/payment/PersonalDetailsForm'
 import CardDetailsForm from '../components/payment/CardDetailsForm'
+import PaymentMethodSelector from "../components/payment/PaymentMethodSelector";
 import { Lock, CreditCard, Wallet} from 'lucide-react'
 import { useNavigate } from "react-router-dom";
 import DOMPurify from 'dompurify'
@@ -49,6 +50,52 @@ export default function PaymentPage() {
             setAmount(value)
         }
     }
+
+    // const validate = () => {
+    // const e = {};
+
+    // // Personal details
+    // if (!address || address.length < 5) e.address = 'Enter a valid address';
+    // if (!city) e.city = 'Required';
+    // if (!state) e.state = 'Required';
+    // if (!/^\d{4,10}$/.test(postalCode)) e.postalCode = 'Invalid postal code';
+
+    // // Amount
+    // if (!amount || parseFloat(amount) <= 0) e.amount = 'Please enter a valid amount';
+    // else if (parseFloat(amount) < 100) e.amount = 'Minimum top-up amount is LKR 100';
+    // else if (parseFloat(amount) > 50000) e.amount = 'Maximum top-up amount is LKR 50,000';
+
+    // // Card details
+    // if (!cardName) e.cardName = 'Required';
+    // if (!/^\d{16}$/.test(cardNumber.replace(/\s/g, ''))) e.cardNumber = 'Enter a valid 16-digit card number';
+    // if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiry)) e.expiry = 'Use MM/YY';
+    // if (!/^\d{3,4}$/.test(cvc)) e.cvc = 'Invalid CVC';
+
+    // setErrors(e);
+    // return Object.keys(e).length === 0;
+    // };
+
+    // const handleNext = async () => {
+    // if (!validate()) return;
+
+    // setIsRateLimited(true);
+    // setTimeout(() => setIsRateLimited(false), 5000);
+
+    // setIsLoading(true);
+
+    // const success = Math.random() > 0.2;
+
+    // if (success) {
+    //     setWalletBalance(prev => prev + parseFloat(amount));
+    //     setPopupMessage({ success: true, text: `LKR ${parseFloat(amount).toFixed(2)} added to your wallet!` });
+    // } else {
+    //     setPopupMessage({ success: false, text: 'Payment failed. Please check your card details and try again.' });
+    // }
+
+    // setIsLoading(false);
+    // setCvc('');
+    // setShowPopup(true);
+    // };
 
     const handleNext = async () => {
         // TODO: Replace this entire block with real validation + API call
@@ -174,6 +221,16 @@ export default function PaymentPage() {
                     postalCode={postalCode} setPostalCode={setPostalCode}
                     errors={errors}
                 />
+
+                
+                <div className="my-6">
+                    <PaymentMethodSelector
+                        selected={selectedMethod}
+                        setSelectedMethod={setSelectedMethod}
+                        errors={errors}
+                    />
+                </div>
+
                 
                 <CardDetailsForm
                     cardName={cardName} setCardName={setCardName}
