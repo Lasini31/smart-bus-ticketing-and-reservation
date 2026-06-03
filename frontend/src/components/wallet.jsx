@@ -64,17 +64,19 @@ export default function Wallet() {
     const amount = Number(refundAmount)
     if (!amount || amount <= 0) return
 
-    setBalance(prev => Number((prev - amount).toFixed(2)))
+    setBalance(prev => Number((prev + amount).toFixed(2)))
+
     setTransactions(prev => [
       {
         id: prev.length + 1,
         label: refundReason ? `Refund: ${refundReason}` : 'Refund',
-        amount: -amount,
+        amount: amount,
         date: new Date().toISOString().slice(0, 10),
-        status: 'Pending'
+        status: 'Completed'
       },
       ...prev
     ])
+
     setRefundAmount('')
     setRefundReason('')
   }
@@ -182,6 +184,8 @@ export default function Wallet() {
                       setCustomTopUp(value)
                       if (value) {
                         setSelectedAmount(Number(value))
+                      } else {
+                        setSelectedAmount(0)
                       }
                     }}
                     placeholder="Enter amount"
@@ -195,7 +199,7 @@ export default function Wallet() {
                 onClick={handleTopUp}
                 className="mt-6 w-full rounded-full bg-green-600 hover:bg-green-700 px-5 py-3 text-sm font-bold text-white transition"
               >
-                Top up Rs. {customTopUp || selectedAmount}
+                Top up Rs. {customTopUp ? customTopUp : selectedAmount || 0}
               </button>
             </div>
 
