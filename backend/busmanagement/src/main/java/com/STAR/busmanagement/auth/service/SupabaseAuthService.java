@@ -1,6 +1,7 @@
 package com.STAR.busmanagement.auth.service;
 
 import com.STAR.busmanagement.auth.dto.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -10,18 +11,21 @@ import java.util.Map;
 @Service
 public class SupabaseAuthService implements AuthService{
 
-    private final String SUPABASE_URL = "https://YOUR_PROJECT.supabase.co";
-    private final String API_KEY = "YOUR_ANON_KEY";
+        @Value("${supabase.url}")
+        private String supabaseUrl;
+
+        @Value("${supabase.api-key}")
+        private String apiKey;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
     public AuthResponse login(LoginRequest request) {
 
-        String url = SUPABASE_URL + "/auth/v1/token?grant_type=password";
+                String url = supabaseUrl + "/auth/v1/token?grant_type=password";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("apikey", API_KEY);
+                headers.set("apikey", apiKey);
 
         Map<String, String> body = Map.of(
                 "email", request.getUsername(),
@@ -55,11 +59,11 @@ public class SupabaseAuthService implements AuthService{
 
     public AuthResponse register(RegisterRequest request) {
 
-    String url = SUPABASE_URL + "/auth/v1/signup";
+        String url = supabaseUrl + "/auth/v1/signup";
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.set("apikey", API_KEY);
+        headers.set("apikey", apiKey);
 
     Map<String, Object> body = Map.of(
             "email", request.getEmail(),
@@ -89,11 +93,11 @@ public class SupabaseAuthService implements AuthService{
 
     public void forgotPassword(ForgotPasswordRequest request) {
 
-    String url = SUPABASE_URL + "/auth/v1/recover";
+        String url = supabaseUrl + "/auth/v1/recover";
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.set("apikey", API_KEY);
+        headers.set("apikey", apiKey);
 
     Map<String, String> body = Map.of(
             "email", request.getEmail()
@@ -106,11 +110,11 @@ public class SupabaseAuthService implements AuthService{
 
     public AuthResponse loginWithGoogle(GoogleLoginRequest request) {
 
-    String url = SUPABASE_URL + "/auth/v1/token?grant_type=id_token";
+        String url = supabaseUrl + "/auth/v1/token?grant_type=id_token";
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.set("apikey", API_KEY);
+        headers.set("apikey", apiKey);
 
     Map<String, String> body = Map.of(
             "provider", "google",
@@ -143,10 +147,10 @@ public class SupabaseAuthService implements AuthService{
     
     public void logout(String token) {
 
-    String url = SUPABASE_URL + "/auth/v1/logout";
+        String url = supabaseUrl + "/auth/v1/logout";
 
     HttpHeaders headers = new HttpHeaders();
-    headers.set("apikey", API_KEY);
+        headers.set("apikey", apiKey);
     headers.set("Authorization", "Bearer " + token);
 
     HttpEntity<Void> entity = new HttpEntity<>(headers);
