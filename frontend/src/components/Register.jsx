@@ -1,10 +1,65 @@
+import { useState } from 'react';
+
 export default function Register() {
+  // --- 1. STATE VARIABLES ---
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  // --- 2. SUBMIT FUNCTION ---
+  const handleSubmit = async (event) => {
+    event.preventDefault(); // Prevents the page from refreshing
+
+    setErrorMessage(''); // Clear old errors
+
+    // --- 3. CLIENT-SIDE VALIDATION ---
+    if (password !== confirmPassword) {
+      setErrorMessage("Passwords do not match!");
+      return; 
+    }
+
+    // --- 4. PREPARE DATA FOR BACKEND ---
+    // Match these names with what your backend team asks for
+    const userData = {
+      username: username,
+      password: password,
+      phone: phone,
+      email: email
+    };
+
+    try {
+      // Connect to the backend (Replace URL when backend team gives it to you)
+      const response = await fetch('http://localhost:5000/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        alert("Registration Successful! You can now log in.");
+        // Usually, you would use React Router here to navigate to the Login page
+      } else {
+        setErrorMessage(data.message || "Registration failed. Please try again.");
+      }
+
+    } catch (error) {
+      console.log("Failed to connect to backend", error);
+      setErrorMessage("Server error. Please make sure the backend is running.");
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-white">
       
       {/* Left Side: Bus Image */}
       <div className="hidden md:flex w-1/2 justify-center items-center p-12">
-        {/* We are pointing this to a file named bus.png in your public folder */}
         <img 
           src="/bus.png" 
           alt="White Bus" 
@@ -17,40 +72,78 @@ export default function Register() {
         <div className="w-full max-w-md">
           <h1 className="text-4xl font-bold text-center mb-8">Create an account</h1>
 
-          <form className="space-y-4">
+          {/* ADDED onSubmit to the form */}
+          <form className="space-y-4" onSubmit={handleSubmit}>
             {/* Username */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
-              <input type="text" className="block w-full px-3 py-2 border border-green-400 rounded focus:outline-none focus:ring-1 focus:ring-green-500" />
+              <input 
+                type="text" 
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                className="block w-full px-3 py-2 border border-green-400 rounded focus:outline-none focus:ring-1 focus:ring-green-500" 
+              />
             </div>
 
             {/* Password */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-              <input type="password" className="block w-full px-3 py-2 border border-green-400 rounded focus:outline-none focus:ring-1 focus:ring-green-500" />
+              <input 
+                type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="block w-full px-3 py-2 border border-green-400 rounded focus:outline-none focus:ring-1 focus:ring-green-500" 
+              />
             </div>
 
             {/* Confirm Password */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Confirm password</label>
-              <input type="password" className="block w-full px-3 py-2 border border-green-400 rounded focus:outline-none focus:ring-1 focus:ring-green-500" />
+              <input 
+                type="password" 
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                className="block w-full px-3 py-2 border border-green-400 rounded focus:outline-none focus:ring-1 focus:ring-green-500" 
+              />
             </div>
 
             {/* Phone Number */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-              <input type="tel" className="block w-full px-3 py-2 border border-green-400 rounded focus:outline-none focus:ring-1 focus:ring-green-500" />
+              <input 
+                type="tel" 
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+                className="block w-full px-3 py-2 border border-green-400 rounded focus:outline-none focus:ring-1 focus:ring-green-500" 
+              />
             </div>
 
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input type="email" className="block w-full px-3 py-2 border border-green-400 rounded focus:outline-none focus:ring-1 focus:ring-green-500" />
+              <input 
+                type="email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="block w-full px-3 py-2 border border-green-400 rounded focus:outline-none focus:ring-1 focus:ring-green-500" 
+              />
             </div>
 
-            {/* Sign Up Button */}
+            {/* NEW: Error Message Display */}
+            {errorMessage && (
+              <div className="text-red-500 text-sm font-medium mt-2">
+                {errorMessage}
+              </div>
+            )}
+
+            {/* Sign Up Button (Changed type to "submit") */}
             <div className="mt-6">
-              <button type="button" className="py-1 px-6 border border-gray-800 rounded font-semibold text-gray-800 hover:bg-gray-50">
+              <button type="submit" className="py-1 px-6 border border-gray-800 rounded font-semibold text-gray-800 hover:bg-gray-50">
                 Sign Up
               </button>
             </div>
