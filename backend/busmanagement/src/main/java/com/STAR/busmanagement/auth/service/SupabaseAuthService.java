@@ -10,8 +10,8 @@ import java.util.Map;
 @Service
 public class SupabaseAuthService implements AuthService{
 
-    private final String SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
-    private final String API_KEY = "YOUR_SUPABASE_ANON_KEY";
+    private final String SUPABASE_URL = "https://rpbufjokybeukqcdfumq.supabase.co";
+    private final String API_KEY = "sb_publishable_zWjaFipP-Rn95FQ44BRKbg_9WqwSPpi";
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -66,7 +66,7 @@ public class SupabaseAuthService implements AuthService{
     Map<String, Object> body = Map.of(
             "email", request.getEmail(),
             "password", request.getPassword(),
-            "data", Map.of("role", "passenger") // default role
+            "data", Map.of("role", request.getRole()) 
     );
 
     HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
@@ -84,7 +84,7 @@ public class SupabaseAuthService implements AuthService{
 
     return AuthResponse.builder()
             .token(token)
-            .role("passenger")
+            .role(request.getRole())
             .userId(userId)
             .build();
     }
