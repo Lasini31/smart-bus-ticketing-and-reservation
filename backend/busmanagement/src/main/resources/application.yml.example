@@ -6,7 +6,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: https://rpbufjokybeukqcdfumq.supabase.co
+          jwk-set-uri: SUPABASE_URL/auth/v1/keys
 
 app:
   auth:
