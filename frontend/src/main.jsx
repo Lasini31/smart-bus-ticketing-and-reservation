@@ -18,11 +18,12 @@ import {
 //import NotFound from './notFound.jsx'
 import App from './App.jsx'
 import Home from './components/home.jsx'
-import Feedback from './components/feedback.jsx'
+import About from './components/about.jsx'
 import Login from './components/login.jsx'
 import Profile from './components/profile.jsx'
 import TicketBooking from './components/ticketBooking.jsx'
 import Wallet from './components/wallet.jsx'
+import SeatSelection from './components/SeatSelection.jsx'
 
 // Admin imports goes here
 
@@ -39,8 +40,12 @@ const router = createBrowserRouter(createRoutesFromElements(
           element={<TicketBooking/>}
         />
       <Route
-          path='feedback'
-          element={<Feedback/>}
+          path='booking/select'
+          element={<SeatSelection/>}
+        />
+      <Route
+          path='about'
+          element={<About/>}
         />
       <Route
           path='login'

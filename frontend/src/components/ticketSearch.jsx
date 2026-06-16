@@ -24,18 +24,16 @@ export default function TicketSearch({ onSearch }) {
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [startDate, setStartDate] = useState('');
-  const [travelers, setTravelers] = useState(1);
   const [fromSuggestions, setFromSuggestions] = useState([]);
   const [toSuggestions, setToSuggestions] = useState([]);
   const [showFromSuggestions, setShowFromSuggestions] = useState(false);
   const [showToSuggestions, setShowToSuggestions] = useState(false);
 
-  const handleSearch = (updatedTravelers = travelers) => {
+  const handleSearch = () => {
     onSearch({
       from: from.toLowerCase(),
       to: to.toLowerCase(),
-      startDate,
-      travelers: updatedTravelers
+      startDate
     });
   };
 
@@ -47,8 +45,7 @@ export default function TicketSearch({ onSearch }) {
     onSearch({
       from: to.toLowerCase(),
       to: temp.toLowerCase(),
-      startDate,
-      travelers
+      startDate
     });
   };
 
@@ -69,8 +66,7 @@ export default function TicketSearch({ onSearch }) {
     onSearch({
       from: value.toLowerCase(),
       to: to.toLowerCase(),
-      startDate,
-      travelers
+      startDate
     });
   };
 
@@ -91,8 +87,7 @@ export default function TicketSearch({ onSearch }) {
     onSearch({
       from: from.toLowerCase(),
       to: value.toLowerCase(),
-      startDate,
-      travelers
+      startDate
     });
   };
 
@@ -103,8 +98,7 @@ export default function TicketSearch({ onSearch }) {
     onSearch({
       from: place.toLowerCase(),
       to: to.toLowerCase(),
-      startDate,
-      travelers
+      startDate
     });
   };
 
@@ -115,8 +109,7 @@ export default function TicketSearch({ onSearch }) {
     onSearch({
       from: from.toLowerCase(),
       to: place.toLowerCase(),
-      startDate,
-      travelers
+      startDate
     });
   };
 
@@ -220,56 +213,7 @@ export default function TicketSearch({ onSearch }) {
           </div>
         </div>
 
-        {/* Section 3: Set Travelers */}
-        <div className="flex-1 bg-white shadow-lg pl-6 pr-6 pt-2 pb-2 rounded-lg">
-          <label className="block text-xs font-semibold text-gray-600 mb-3 uppercase">Number of Travelers</label>
-          <div className="flex items-center gap-4 pb-2 ">
-            <input
-              type="number"
-              value={travelers}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value === '') {
-                  setTravelers('');
-                  return;
-                }
-                if (isNaN(value)) return;
-                const newTravelers = Math.min(10, Math.max(1, parseInt(value)));
-                setTravelers(newTravelers);
-                handleSearch(newTravelers);
-              }}
-              onBlur={() => {
-                if (travelers === '' || travelers < 1) {
-                  setTravelers(1);
-                  handleSearch(1);
-                }
-              }}
-              className="w-35 text-center outline-none font-bold text-lg border-b-2 border-gray-300"
-              min="1"
-              max="10"
-            />
-            <button
-              onClick={() => {
-                const newTravelers = Math.max(1, travelers - 1);
-                setTravelers(newTravelers);
-                handleSearch(newTravelers);
-              }}
-              className="flex-shrink-0 bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold w-10 h-10 rounded-full flex items-center justify-center transition text-lg"
-            >
-              −
-            </button>
-            <button
-              onClick={() => {
-                const newTravelers = Math.min(10, travelers + 1);
-                setTravelers(newTravelers);
-                handleSearch(newTravelers);
-              }}
-              className="flex-shrink-0 bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold w-10 h-10 rounded-full flex items-center justify-center transition text-lg"
-            >
-              +
-            </button>
-          </div>
-        </div>
+        {/* Section 3: (removed travelers input) */}
 
       </div>
 
@@ -279,12 +223,10 @@ export default function TicketSearch({ onSearch }) {
           setFrom('');
           setTo('');
           setStartDate('');
-          setTravelers(1);
           onSearch({
             from: '',
             to: '',
-            startDate: '',
-            travelers: 1
+            startDate: ''
           });
         }}
         className="mt-6 text-green-600 hover:text-green-700 font-semibold text-sm"

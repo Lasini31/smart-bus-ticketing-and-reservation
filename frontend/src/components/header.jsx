@@ -61,12 +61,20 @@ const Header = () => {
 						Booking
 					</NavLink>
 					<NavLink
-						to="/feedback"
+						to="/about"
 						className={({ isActive }) =>
 							`rounded-full px-4 py-2 text-sm font-medium transition ${isActive ? 'bg-emerald-600 text-white' : 'text-emerald-800 hover:bg-emerald-50 hover:text-emerald-700'}`
 						}
 					>
-						Feedback
+						About Us
+					</NavLink>
+					<NavLink
+						to="/wallet"
+						className={({ isActive }) =>
+							`rounded-full px-4 py-2 text-sm font-medium transition ${isActive ? 'bg-emerald-600 text-white' : 'text-emerald-800 hover:bg-emerald-50 hover:text-emerald-700'}`
+						}
+					>
+						Wallet
 					</NavLink>
 				</nav>
 
