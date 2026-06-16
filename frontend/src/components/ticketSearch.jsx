@@ -270,6 +270,7 @@ export default function TicketSearch({ onSearch }) {
             </button>
           </div>
         </div>
+
       </div>
 
       {/* Clear Filters */}
