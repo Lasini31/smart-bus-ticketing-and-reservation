@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLanguage } from '../contexts/LanguageContext.jsx'
 import getOnBus from '../../public/icons/getOnBus.png'
 import getOutBus from '../../public/icons/getOutBus.png'
 
@@ -21,6 +22,7 @@ const PLACES = [
 ];
 
 export default function TicketSearch({ onSearch }) {
+  const { messages } = useLanguage()
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -130,7 +132,7 @@ export default function TicketSearch({ onSearch }) {
             {/* From Location */}
             <div className="flex-1 w-full md:w-auto">
               <div className="relative">
-                <label className="block text-xs font-semibold text-gray-600 mb-2 uppercase">From</label>
+                <label className="block text-xs font-semibold text-gray-600 mb-2 uppercase">{messages.search?.from || 'From'}</label>
                 <div className="flex items-center border-b-2 border-gray-300 pb-2">
                   <img src={getOnBus} className='w-8 h-8 mr-2'/>
                   <input
@@ -138,7 +140,7 @@ export default function TicketSearch({ onSearch }) {
                     value={from}
                     onChange={(e) => handleFromChange(e.target.value)}
                     onFocus={() => from.length > 0 && setShowFromSuggestions(true)}
-                    placeholder="Select location"
+                    placeholder={messages.search?.placeholderFrom || 'Select location'}
                     className="w-full outline-none text-sm font-medium"
                     autoComplete="off"
                   />
@@ -173,7 +175,7 @@ export default function TicketSearch({ onSearch }) {
             {/* To Location */}
             <div className="flex-1 w-full md:w-auto">
               <div className="relative">
-                <label className="block text-xs font-semibold text-gray-600 mb-2 uppercase">To</label>
+                <label className="block text-xs font-semibold text-gray-600 mb-2 uppercase">{messages.search?.to || 'To'}</label>
                 <div className="flex items-center border-b-2 border-gray-300 pb-2">
                   <img src={getOutBus} className='w-8 h-8 mr-2'/>
                   <input
@@ -181,7 +183,7 @@ export default function TicketSearch({ onSearch }) {
                     value={to}
                     onChange={(e) => handleToChange(e.target.value)}
                     onFocus={() => to.length > 0 && setShowToSuggestions(true)}
-                    placeholder="Select location"
+                    placeholder={messages.search?.placeholderTo || 'Select location'}
                     className="w-full outline-none text-sm font-medium"
                     autoComplete="off"
                   />
@@ -206,7 +208,7 @@ export default function TicketSearch({ onSearch }) {
 
         {/* Section 2: Select Date */}
         <div className="flex-1 bg-white shadow-lg pl-6 pr-6 pt-2 pb-2 rounded-lg">
-          <label className="block text-xs font-semibold text-gray-600 mb-3 uppercase">Select Date</label>
+          <label className="block text-xs font-semibold text-gray-600 mb-3 uppercase">{messages.search?.date || 'Select Date'}</label>
           <div className="flex items-center border-b-2 border-gray-300 pb-2">
             <input
               type="date"
@@ -222,7 +224,7 @@ export default function TicketSearch({ onSearch }) {
 
         {/* Section 3: Set Travelers */}
         <div className="flex-1 bg-white shadow-lg pl-6 pr-6 pt-2 pb-2 rounded-lg">
-          <label className="block text-xs font-semibold text-gray-600 mb-3 uppercase">Number of Travelers</label>
+          <label className="block text-xs font-semibold text-gray-600 mb-3 uppercase">{messages.search?.travelers || 'Number of Travelers'}</label>
           <div className="flex items-center gap-4 pb-2 ">
             <input
               type="number"

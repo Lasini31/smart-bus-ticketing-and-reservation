@@ -1,37 +1,16 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
-
-const authEventName = 'smart-bus-auth-changed'
-const languageEventName = 'smart-bus-language-changed'
-const authStorageKey = 'smart-bus-user'
-const languageStorageKey = 'smart-bus-language'
+import { useAuth } from '../contexts/AuthContext.jsx'
+import { useLanguage } from '../contexts/LanguageContext.jsx'
 
 const Header = () => {
-	const [isLoggedIn, setIsLoggedIn] = useState(() => Boolean(localStorage.getItem(authStorageKey)))
-	const [language, setLanguage] = useState(() => localStorage.getItem(languageStorageKey) ?? 'EN')
+	const { user } = useAuth()
+	const { language, setLanguage, messages, availableLanguages } = useLanguage()
 
-	useEffect(() => {
-		const syncAuthState = () => setIsLoggedIn(Boolean(localStorage.getItem(authStorageKey)))
-		const syncLanguageState = () => setLanguage(localStorage.getItem(languageStorageKey) ?? 'EN')
-
-		window.addEventListener('storage', syncAuthState)
-		window.addEventListener(authEventName, syncAuthState)
-		window.addEventListener('storage', syncLanguageState)
-		window.addEventListener(languageEventName, syncLanguageState)
-
-		return () => {
-			window.removeEventListener('storage', syncAuthState)
-			window.removeEventListener(authEventName, syncAuthState)
-			window.removeEventListener('storage', syncLanguageState)
-			window.removeEventListener(languageEventName, syncLanguageState)
-		}
-	}, [])
-
-	const nextLanguage = language === 'EN' ? 'සිං' : 'EN'
-
-	const toggleLanguage = () => {
-		localStorage.setItem(languageStorageKey, nextLanguage)
-		window.dispatchEvent(new Event(languageEventName))
+	const cycleLanguage = () => {
+		const idx = availableLanguages.indexOf(language)
+		const next = availableLanguages[(idx + 1) % availableLanguages.length]
+		setLanguage(next)
 	}
 
 	return (
@@ -58,15 +37,7 @@ const Header = () => {
 							`rounded-full px-4 py-2 text-sm font-medium transition ${isActive ? 'bg-emerald-600 text-white' : 'text-emerald-800 hover:bg-emerald-50 hover:text-emerald-700'}`
 						}
 					>
-						Booking
-					</NavLink>
-					<NavLink
-						to="/about"
-						className={({ isActive }) =>
-							`rounded-full px-4 py-2 text-sm font-medium transition ${isActive ? 'bg-emerald-600 text-white' : 'text-emerald-800 hover:bg-emerald-50 hover:text-emerald-700'}`
-						}
-					>
-						About Us
+						{messages.header.booking}
 					</NavLink>
 					<NavLink
 						to="/wallet"
@@ -74,14 +45,22 @@ const Header = () => {
 							`rounded-full px-4 py-2 text-sm font-medium transition ${isActive ? 'bg-emerald-600 text-white' : 'text-emerald-800 hover:bg-emerald-50 hover:text-emerald-700'}`
 						}
 					>
-						Wallet
+						{messages.header.wallet}
+					</NavLink>
+					<NavLink
+						to="/about"
+						className={({ isActive }) =>
+							`rounded-full px-4 py-2 text-sm font-medium transition ${isActive ? 'bg-emerald-600 text-white' : 'text-emerald-800 hover:bg-emerald-50 hover:text-emerald-700'}`
+						}
+					>
+						{messages.header.about}
 					</NavLink>
 				</nav>
 
 				<div className="flex items-center gap-2 sm:gap-3">
 					<button
 						type="button"
-						onClick={toggleLanguage}
+						onClick={cycleLanguage}
 						className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100"
 						aria-label="Change language"
 					>
@@ -89,7 +68,7 @@ const Header = () => {
 						<span>{language}</span>
 					</button>
 
-					{isLoggedIn ? (
+					{user ? (
 						<NavLink
 							to="/profile"
 							className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700"
@@ -106,7 +85,7 @@ const Header = () => {
 							to="/login"
 							className="inline-flex items-center rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700"
 						>
-							Login
+							{messages.header.login}
 						</NavLink>
 					)}
 				</div>

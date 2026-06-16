@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useWallet } from '../contexts/WalletContext.jsx'
 
 const INITIAL_TRANSACTIONS = [
   {
@@ -27,12 +29,12 @@ const INITIAL_TRANSACTIONS = [
 const TOP_UP_OPTIONS = [500, 1000, 2000, 5000]
 
 export default function Wallet() {
-  const [balance, setBalance] = useState(5440.5)
+  const { balance, transactions, refund } = useWallet()
   const [selectedAmount, setSelectedAmount] = useState(1000)
   const [customTopUp, setCustomTopUp] = useState('')
   const [refundAmount, setRefundAmount] = useState('')
   const [refundReason, setRefundReason] = useState('')
-  const [transactions, setTransactions] = useState(INITIAL_TRANSACTIONS)
+  const navigate = useNavigate()
 
   const availableSpending = useMemo(() => balance.toFixed(2), [balance])
 
@@ -45,36 +47,16 @@ export default function Wallet() {
     const amount = Number(customTopUp || selectedAmount)
     if (!amount || amount <= 0) return
 
-    setBalance(prev => Number((prev + amount).toFixed(2)))
-    setTransactions(prev => [
-      {
-        id: prev.length + 1,
-        label: 'Top-up',
-        amount,
-        date: new Date().toISOString().slice(0, 10),
-        status: 'Completed'
-      },
-      ...prev
-    ])
     setCustomTopUp('')
     setSelectedAmount(amount)
+    navigate('/payment', { state: { amount } })
   }
 
   function handleRefund() {
     const amount = Number(refundAmount)
     if (!amount || amount <= 0) return
 
-    setBalance(prev => Number((prev - amount).toFixed(2)))
-    setTransactions(prev => [
-      {
-        id: prev.length + 1,
-        label: refundReason ? `Refund: ${refundReason}` : 'Refund',
-        amount: -amount,
-        date: new Date().toISOString().slice(0, 10),
-        status: 'Pending'
-      },
-      ...prev
-    ])
+    refund(amount, refundReason)
     setRefundAmount('')
     setRefundReason('')
   }

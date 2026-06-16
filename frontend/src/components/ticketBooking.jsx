@@ -1,10 +1,12 @@
 import { useState, useMemo } from 'react';
+import { useLanguage } from '../contexts/LanguageContext.jsx'
 import TicketSearch from './ticketSearch';
 import TicketCard from './ticketCard';
 import { SAMPLE_TICKETS } from './ticketSampleData';
 import topup from '../../public/icons/topup.png';
 
 export default function TicketBooking() {
+  const { messages } = useLanguage()
   const [filters, setFilters] = useState({
     from: '',
     to: '',
@@ -55,10 +57,8 @@ export default function TicketBooking() {
         {/* Results Header */}
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-800">
-            Available Buses
-            <span className="text-sm text-gray-600 ml-2">
-              ({filteredTickets.length} results)
-            </span>
+            {messages.booking?.available || 'Available Buses'}
+            <span className="text-sm text-gray-600 ml-2">({filteredTickets.length} results)</span>
           </h2>
         </div>
 

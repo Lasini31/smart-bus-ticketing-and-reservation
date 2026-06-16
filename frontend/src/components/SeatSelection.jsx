@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useWallet } from '../contexts/WalletContext.jsx';
 
 export default function SeatSelection() {
   const { state } = useLocation();
   const navigate = useNavigate();
+  const { balance, deduct } = useWallet();
   const ticket = state?.ticket;
   const initialTravelers = state?.travelers ?? 0;
 
@@ -52,10 +54,26 @@ export default function SeatSelection() {
       numTickets,
       totalAmount: (ticket.pricePerSeat * numTickets)
     };
-    // For now, just alert and log — integration with payment needed
-    console.log('Proceeding to payment with', payload);
-    alert('Proceeding to payment — check console for payload');
-    // navigate('/payment', { state: payload });
+    if (payload.totalAmount > balance) {
+      alert('Not enough balance. Redirecting to wallet top-up.');
+      navigate('/wallet');
+      return;
+    }
+
+    const success = deduct(payload.totalAmount, `Bus ticket: ${ticket.busName}`);
+    if (!success) {
+      alert('There was a problem deducting your balance. Please top up first.');
+      navigate('/wallet');
+      return;
+    }
+
+    navigate('/booking/ticket', {
+      state: {
+        ticket,
+        seats: selectedSeats,
+        totalAmount: payload.totalAmount
+      }
+    });
   };
 
   const rows = [];
@@ -173,6 +191,7 @@ export default function SeatSelection() {
           <div className="mt-6">
             <p className="text-sm text-gray-600">Price/Seat: <span className="font-bold text-green-700">Rs {ticket.pricePerSeat}</span></p>
             <p className="text-lg font-bold text-green-700 mt-2">Total: Rs {(ticket.pricePerSeat * numTickets).toFixed(2)}</p>
+            <p className="text-sm text-gray-600 mt-2">Wallet balance: <span className="font-semibold text-green-700">Rs {balance.toFixed(2)}</span></p>
           </div>
 
           <button
