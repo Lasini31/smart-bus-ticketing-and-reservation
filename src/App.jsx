@@ -1,15 +1,13 @@
-import './App.css'
-import { Outlet } from 'react-router-dom'
-import Header from './components/header'
+import { Outlet } from 'react-router-dom';
+import Header from './components/header.jsx';
 
-export default function Layout(){
-
-    return(
-        <div className="min-h-screen pt-16">
-            <Header/>
-            <main>
-               <Outlet/> 
-            </main>
-        </div>
-    )
+export default function App() {
+  return (
+    <div>
+      <Header />
+      <main className="mt-16">
+        <Outlet />
+      </main>
+    </div>
+  );
 }
