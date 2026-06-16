@@ -1,8 +1,9 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; 
 
 export default function Register() {
-  // --- 1. STATE VARIABLES ---
-  const [role, setRole] = useState(''); // NEW: Starts empty so they MUST select one
+  // --- STATE VARIABLES ---
+  const [role, setRole] = useState(''); 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -10,38 +11,36 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  // --- 2. GOOGLE SIGN UP HANDLER ---
-  const handleGoogleSignUp = () => {
-    setErrorMessage(''); // Clear old errors
+  const navigate = useNavigate(); // Initialize the navigation tool
 
-    // Check if role is selected first
+  // --- GOOGLE SIGN UP HANDLER ---
+  const handleGoogleSignUp = () => {
+    setErrorMessage(''); 
+
     if (!role) {
       setErrorMessage("Please select a role before signing up with Google.");
       return;
     }
 
-    // You will add your actual Google Firebase/Auth logic here later
     alert(`Ready to connect to Google Auth as a: ${role}`);
   };
 
-  // --- 3. SUBMIT FUNCTION FOR MANUAL SIGN UP ---
+  // --- SUBMIT FUNCTION FOR MANUAL SIGN UP ---
   const handleSubmit = async (event) => {
     event.preventDefault(); 
     setErrorMessage(''); 
 
-    // Check if role is selected first
     if (!role) {
       setErrorMessage("Please select a role before signing up manually.");
       return;
     }
 
-    // Check if passwords match
     if (password !== confirmPassword) {
       setErrorMessage("Passwords do not match!");
       return; 
     }
 
-    // --- 4. PREPARE DATA FOR BACKEND ---
+    // --- PREPARE DATA FOR BACKEND ---
     const userData = {
       role: role, 
       username: username,
@@ -62,7 +61,8 @@ export default function Register() {
       const data = await response.json();
       
       if (response.ok) {
-        alert("Registration Successful! You can now log in.");
+        // Teleport the user to the login page on success!
+        navigate('/login'); 
       } else {
         setErrorMessage(data.message || "Registration failed. Please try again.");
       }
@@ -90,7 +90,7 @@ export default function Register() {
         <div className="w-full max-w-md">
           <h1 className="text-4xl font-bold text-center mb-8">Create an account</h1>
 
-          {/* NEW: Compulsory Role Selection Dropdown */}
+          {/* Compulsory Role Selection Dropdown */}
           <div className="mb-6">
             <select 
               value={role}
@@ -98,7 +98,6 @@ export default function Register() {
               required
               className="block w-full px-3 py-2 border border-green-400 rounded focus:outline-none focus:ring-1 focus:ring-green-500 bg-white text-gray-700"
             >
-              {/* Disabled placeholder option so they are forced to pick a real one */}
               <option value="" disabled>Select your role...</option>
               <option value="passenger">Passenger</option>
               <option value="driver">Driver</option>
@@ -202,7 +201,7 @@ export default function Register() {
           {/* Bottom Link */}
           <div className="text-center mt-6">
             <p className="text-xs text-gray-600 font-medium">Already have an account?</p>
-            <a href="#" className="text-xs text-green-500 hover:underline">Login</a>
+            <a href="/login" className="text-xs text-green-500 hover:underline">Login</a>
           </div>
           
         </div>
