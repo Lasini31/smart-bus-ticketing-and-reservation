@@ -1,3 +1,4 @@
+
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
@@ -26,6 +27,8 @@ import TicketBooking from './components/ticketBooking.jsx'
 import Wallet from './components/wallet.jsx'
 import SeatSelection from './components/SeatSelection.jsx'
 import PaymentPage from './components/paymentPage.jsx'
+
+import Register from './components/Register.jsx'
 
 // Admin imports goes here
 
@@ -56,6 +59,10 @@ const router = createBrowserRouter(createRoutesFromElements(
       <Route
           path='login'
           element={<Login/>}
+        />
+        <Route
+          path='register'
+          element={<Register/>}
         />
       <Route
           path='profile'
