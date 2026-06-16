@@ -43,8 +43,8 @@ const FEATURES = [
         <circle cx="12" cy="9" r="2.5" />
       </svg>
     ),
-    title: "Live Route Tracking",
-    desc: "Track your bus in real-time so you are never left waiting.",
+    title: "Route Tracking",
+    desc: "Track your bus everyday so you are never left waiting.",
   },
   {
     icon: (
@@ -70,14 +70,6 @@ const FEATURES = [
   },
 ];
 
-const POPULAR_ROUTES = [
-  { from: "Colombo", to: "Kandy", duration: "2h 30m", price: "350", tag: "Most Popular" },
-  { from: "Colombo", to: "Galle", duration: "2h 15m", price: "280", tag: "Scenic" },
-  { from: "Kandy", to: "Nuwara Eliya", duration: "1h 45m", price: "220", tag: "Hill Country" },
-  { from: "Colombo", to: "Jaffna", duration: "6h 30m", price: "750", tag: "Long Distance" },
-  { from: "Galle", to: "Matara", duration: "0h 50m", price: "120", tag: "Express" },
-  { from: "Colombo", to: "Anuradhapura", duration: "4h 00m", price: "600", tag: "Heritage" },
-];
 
 export default function Home() {
   // FIX 2: separate slide index from a "transitioning" flag used only for text animation
@@ -106,7 +98,7 @@ export default function Home() {
   const today = new Date().toISOString().split("T")[0];
 
   return (
-    <div className="min-h-screen bg-white font-sans">
+    <div className="min-h-screen bg-white font-sans -mt-[82px]">
 
       {/* ─── HERO SLIDER ──────────────────────────────────────────────
           FIX 1: height is 75vh (3/4 screen), full width
@@ -135,7 +127,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/65 z-10" />
 
         {/* TEXT LAYER — FIX 3: anchored to upper-centre, animates independently */}
-        <div className="absolute inset-x-0 top-0 z-20 flex flex-col items-center justify-center px-4 text-center"
+        <div className="absolute inset-x-0 top-12 z-20 flex flex-col items-center justify-center px-4 text-center"
              style={{ height: "55%" }}>
           <div key={textKey} style={{ animation: "fadeSlideUp 0.6s ease both" }}>
             <span className="inline-block rounded-full bg-green-500/20 border border-green-400/40 px-4 py-1 text-xs font-semibold text-green-300 tracking-widest uppercase mb-4 backdrop-blur-sm">
@@ -151,7 +143,7 @@ export default function Home() {
         </div>
 
         {/* SEARCH BAR LAYER — FIX 3: fixed at bottom-centre of hero, never moves */}
-        <div className="absolute inset-x-0 bottom-0 z-20 flex flex-col items-center px-4 pb-8">
+        <div className="absolute inset-x-0 bottom-5 z-20 flex flex-col items-center px-4 pb-8">
           <div className="w-full max-w-4xl bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 shadow-2xl">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="flex flex-col bg-white rounded-xl px-4 py-3 gap-1">
@@ -224,52 +216,54 @@ export default function Home() {
 
       {/* ─── FIX 4: USER LOGIN BUTTON — sits between hero and stats bar ─── */}
       <div className="bg-white border-b border-slate-100 py-3 px-4">
-        <div className="mx-auto max-w-7xl flex items-center justify-end gap-3">
+        <div className="mx-auto max-w-7xl flex items-center justify-center gap-3">
           <span className="text-sm text-slate-500">Already have an account?</span>
           <a
             href="/login"
-            className="inline-flex items-center gap-2 rounded-full border border-green-600 text-green-700 hover:bg-green-600 hover:text-white transition-all font-semibold text-sm px-5 py-2"
+            className="inline-flex items-center gap-2 w-[140px] text-center justify-center rounded-full border border-green-600 text-green-700 hover:bg-green-600 hover:text-white transition-all font-semibold text-sm px-5 py-2"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
               <circle cx="12" cy="8" r="4" />
               <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
             </svg>
-            Sign In
+            LogIn
           </a>
           <a
             href="/register"
-            className="inline-flex items-center gap-2 rounded-full bg-green-600 hover:bg-green-700 transition-all text-white font-semibold text-sm px-5 py-2 shadow-sm"
+            className="inline-flex items-center gap-2 w-[140px] text-center justify-center rounded-full bg-green-600 hover:bg-green-700 transition-all text-white font-semibold text-sm px-5 py-2 shadow-sm"
           >
             Create Account
           </a>
         </div>
       </div>
 
-      {/* STATS BAR */}
-      <section className="bg-green-600 py-5">
-        <div className="mx-auto max-w-7xl px-4">
-          <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-green-500">
-            {[
-              { n: "500+", label: "Daily Routes" },
-              { n: "1.2M+", label: "Happy Passengers" },
-              { n: "200+", label: "Partner Buses" },
-              { n: "99.8%", label: "On-time Rate" },
-            ].map((s) => (
-              <div key={s.label} className="text-center px-4 py-2">
-                <div className="text-2xl font-black text-white">{s.n}</div>
-                <div className="text-xs text-green-200 font-medium mt-0.5">{s.label}</div>
-              </div>
-            ))}
+{/* STATS BAR */}
+<section className="bg-white border-y border-slate-100 py-8">
+  <div className="mx-auto max-w-7xl px-4">
+    <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-slate-200">
+      {[
+        { n: "500+", label: "Daily Routes" },
+        { n: "1.2M+", label: "Happy Passengers" },
+        { n: "200+", label: "Partner Buses" },
+        { n: "99.8%", label: "On-time Rate" },
+      ].map((s) => (
+        <div key={s.label} className="text-center px-4">
+          <div className="text-3xl font-black text-slate-700">{s.n}</div>
+          <div className="text-xs text-green-600 font-semibold tracking-wide uppercase mt-1">
+            {s.label}
           </div>
         </div>
-      </section>
+      ))}
+    </div>
+  </div>
+</section>
 
       {/* FEATURES */}
       <section className="py-20 bg-white">
         <div className="mx-auto max-w-7xl px-4">
           <div className="text-center mb-12">
             <span className="text-xs font-bold tracking-widest uppercase text-green-600">Why BusGoLK</span>
-            <h2 className="mt-2 text-3xl lg:text-4xl font-black text-slate-900">Everything you need in one app</h2>
+            <h2 className="mt-2 text-3xl lg:text-4xl font-black text-slate-900">Everything you need in one place</h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {FEATURES.map((f) => (
@@ -285,42 +279,47 @@ export default function Home() {
         </div>
       </section>
 
-      {/* POPULAR ROUTES */}
+      {/* USER FEEDBACK */}
       <section className="py-20 bg-green-50">
         <div className="mx-auto max-w-7xl px-4">
-          <div className="flex items-end justify-between mb-10">
-            <div>
-              <span className="text-xs font-bold tracking-widest uppercase text-green-600">Routes</span>
-              <h2 className="mt-1 text-3xl font-black text-slate-900">Popular journeys</h2>
-            </div>
-            <a href="/routes" className="text-sm font-semibold text-green-600 hover:text-green-700 transition-colors">View all</a>
+          <div className="text-center mb-10">
+            <span className="text-xs font-bold tracking-widest uppercase text-green-600">Customer reviews</span>
+            <h2 className="mt-2 text-3xl font-black text-slate-900">What our users are saying</h2>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {POPULAR_ROUTES.map((r) => (
-              <a
-                key={`${r.from}-${r.to}`}
-                href={`/booking?from=${r.from}&to=${r.to}`}
-                className="group flex items-center justify-between rounded-2xl bg-white border border-slate-100 p-5 shadow-sm hover:shadow-md hover:border-green-300 hover:-translate-y-0.5 transition-all duration-200"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="flex flex-col items-center">
-                    <div className="w-2 h-2 rounded-full bg-green-500 border-2 border-green-200" />
-                    <div className="w-px h-6 bg-green-200 my-1" />
-                    <div className="w-2 h-2 rounded-full bg-slate-400 border-2 border-slate-200" />
-                  </div>
-                  <div>
-                    <div className="font-bold text-slate-900 text-sm">{r.from}</div>
-                    <div className="text-xs text-slate-400 my-0.5">{r.duration}</div>
-                    <div className="font-bold text-slate-900 text-sm">{r.to}</div>
-                  </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            <div className="rounded-3xl bg-white p-6 shadow-sm border border-slate-200">
+              <div className="flex items-center gap-4 mb-5">
+                <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&q=80" alt="User profile" className="h-14 w-14 rounded-full object-cover" />
+                <div>
+                  <p className="font-bold text-slate-900">Priya</p>
+                  <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Frequent traveler</p>
                 </div>
-                <div className="text-right">
-                  <span className="inline-block rounded-full bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-0.5 mb-2">{r.tag}</span>
-                  <div className="text-xs text-slate-400">from</div>
-                  <div className="text-lg font-black text-green-600">Rs. {r.price}</div>
+              </div>
+              <p className="text-slate-900 font-semibold mb-3">Fast booking and clear seat layout made my trip planning effortless.</p>
+              <p className="text-sm leading-relaxed text-slate-500">I was able to reserve the perfect seat, complete payment quickly, and get my ticket instantly. The whole experience felt smooth and reliable.</p>
+            </div>
+            <div className="rounded-3xl bg-white p-6 shadow-sm border border-slate-200">
+              <div className="flex items-center gap-4 mb-5">
+                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120&q=80" alt="User profile" className="h-14 w-14 rounded-full object-cover" />
+                <div>
+                  <p className="font-bold text-slate-900">Saman</p>
+                  <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Business commuter</p>
                 </div>
-              </a>
-            ))}
+              </div>
+              <p className="text-slate-900 font-semibold mb-3">The app's route search and schedule details saved me so much time.</p>
+              <p className="text-sm leading-relaxed text-slate-500">I could compare buses and prices in seconds, and the digital ticket made boarding fast. This is now my go-to travel app.</p>
+            </div>
+            <div className="rounded-3xl bg-white p-6 shadow-sm border border-slate-200">
+              <div className="flex items-center gap-4 mb-5">
+                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&q=80" alt="User profile" className="h-14 w-14 rounded-full object-cover" />
+                <div>
+                  <p className="font-bold text-slate-900">Nadeesha</p>
+                  <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Holiday planner</p>
+                </div>
+              </div>
+              <p className="text-slate-900 font-semibold mb-3">I loved how easy it was to book a family trip with real-time availability.</p>
+              <p className="text-sm leading-relaxed text-slate-500">The seating selection and booking confirmation were instant, and the process felt secure from start to finish. Highly recommended.</p>
+            </div>
           </div>
         </div>
       </section>
