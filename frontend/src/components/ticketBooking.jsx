@@ -9,7 +9,7 @@ export default function TicketBooking() {
     from: '',
     to: '',
     startDate: '',
-    
+    travelers: 1
   });
 
   // Filter tickets based on search criteria
@@ -66,11 +66,12 @@ export default function TicketBooking() {
         <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
           {filteredTickets.length > 0 ? (
             filteredTickets.map(ticket => {
-              const canBook = ticket.seatsAvailable > 0;
+              const canBook = filters.travelers <= ticket.seatsAvailable;
               return (
                 <div key={ticket.id} className={canBook ? '' : 'opacity-60'}>
                   <TicketCard
                     ticket={ticket}
+                    travelers={filters.travelers}
                   />
                 </div>
               );
