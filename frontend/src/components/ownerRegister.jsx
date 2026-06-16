@@ -25,7 +25,7 @@ export default function OwnerRegister() {
       const result = await response.json()
       setUser({ name: form.businessName, token: result.token, userId: result.userId, role: 'owner' })
       setStatus({ type: 'success', text: 'Owner registration complete. Redirecting...' })
-      setTimeout(() => navigate('/profile'), 700)
+      setTimeout(() => navigate('/owner-register/bus-setup'), 700)
     } catch (error) {
       setStatus({ type: 'error', text: 'Registration failed. Please try again.' })
     }

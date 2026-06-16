@@ -16,6 +16,7 @@ import About from './components/about.jsx'
 import Login from './components/login.jsx'
 import Register from './components/register.jsx'
 import OwnerRegister from './components/ownerRegister.jsx'
+import BusSetup from './components/BusSetup.jsx'
 import Profile from './components/profile.jsx'
 import TicketBooking from './components/ticketBooking.jsx'
 import Wallet from './components/wallet.jsx'
@@ -43,6 +44,7 @@ const router = createBrowserRouter(createRoutesFromElements(
       <Route path='login' element={<Login />} />
       <Route path='register' element={<Register />} />
       <Route path='owner-register' element={<OwnerRegister />} />
+      <Route path='owner/bus-setup' element={<BusSetup />} />
       <Route path='profile' element={<Profile />} />
       <Route path='wallet' element={<Wallet />} />
       <Route path='payment' element={<PaymentPage />} />
