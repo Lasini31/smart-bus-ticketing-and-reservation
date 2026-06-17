@@ -45,3 +45,5 @@ src/main/resources/application.yml.example
 
 # Build files
 target/
+### Env
+.env

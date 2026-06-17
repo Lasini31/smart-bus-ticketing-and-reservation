@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Link, NavLink } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useLanguage } from '../contexts/LanguageContext.jsx'
 
 const Header = () => {
-	const { user } = useAuth()
+	const { user, logout } = useAuth()
+	const navigate = useNavigate()
 	const { language, setLanguage, messages, availableLanguages } = useLanguage()
 
 	const { pathname } = useLocation()
@@ -31,6 +32,11 @@ const Header = () => {
 		const idx = availableLanguages.indexOf(language)
 		const next = availableLanguages[(idx + 1) % availableLanguages.length]
 		setLanguage(next)
+	}
+
+	const handleLogout = () => {
+		logout()
+		navigate('/')
 	}
 
 	const headerBase = 'fixed left-0 right-0 top-0 z-10 h-[4.5rem] backdrop-blur transition-colors duration-300 z-100'
@@ -93,17 +99,13 @@ const Header = () => {
 					</button>
 
 					{user ? (
-						<NavLink
-							to="/profile"
-							className={`inline-flex h-11 w-11 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700 ${isHome && isAtTop ? '' : ''}`}
-							aria-label="Open profile"
-							title="Profile"
+						<button
+							type="button"
+							onClick={handleLogout}
+							className={`inline-flex items-center rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700 ${isHome && isAtTop ? '' : ''}`}
 						>
-							<svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" aria-hidden="true">
-								<path d="M12 12.25a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z" stroke="currentColor" strokeWidth="1.8" />
-								<path d="M5.5 19.25c1.55-3.15 4.07-4.75 6.5-4.75s4.95 1.6 6.5 4.75" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-							</svg>
-						</NavLink>
+							{messages.header.logout || 'Logout'}
+						</button>
 					) : (
 						<NavLink
 							to="/login"
