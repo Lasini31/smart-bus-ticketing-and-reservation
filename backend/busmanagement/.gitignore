@@ -33,7 +33,7 @@ build/
 .vscode/
 
 # Hide real config file with keys
-src/main/resources/application.yml.example
+src/main/resources/application.yml
 
 # Hide any local environment files
 .env

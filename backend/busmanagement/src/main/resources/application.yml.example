@@ -1,0 +1,13 @@
+server:
+  port: 8081
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://rpbufjokybeukqcdfumq.supabase.co
+
+app:
+  auth:
+    mock: false
