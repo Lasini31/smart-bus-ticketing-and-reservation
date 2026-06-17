@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useAuth } from '../contexts/AuthContext.jsx'
 
 const SLIDES = [
   {
@@ -72,6 +73,7 @@ const FEATURES = [
 
 
 export default function Home() {
+  const { user } = useAuth()
   // FIX 2: separate slide index from a "transitioning" flag used only for text animation
   const [current, setCurrent] = useState(0);
   const [textKey, setTextKey] = useState(0); // triggers text re-animation only
@@ -215,27 +217,29 @@ export default function Home() {
       </section>
 
       {/* ─── FIX 4: USER LOGIN BUTTON — sits between hero and stats bar ─── */}
-      <div className="bg-white border-b border-slate-100 py-3 px-4">
-        <div className="mx-auto max-w-7xl flex items-center justify-center gap-3">
-          <span className="text-sm text-slate-500">Already have an account?</span>
-          <a
-            href="/login"
-            className="inline-flex items-center gap-2 w-[140px] text-center justify-center rounded-full border border-green-600 text-green-700 hover:bg-green-600 hover:text-white transition-all font-semibold text-sm px-5 py-2"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
-              <circle cx="12" cy="8" r="4" />
-              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-            </svg>
-            LogIn
-          </a>
-          <a
-            href="/register"
-            className="inline-flex items-center gap-2 w-[140px] text-center justify-center rounded-full bg-green-600 hover:bg-green-700 transition-all text-white font-semibold text-sm px-5 py-2 shadow-sm"
-          >
-            Create Account
-          </a>
+      { !user && (
+        <div className="bg-white border-b border-slate-100 py-3 px-4">
+          <div className="mx-auto max-w-7xl flex items-center justify-center gap-3">
+            <span className="text-sm text-slate-500">Already have an account?</span>
+            <a
+              href="/login"
+              className="inline-flex items-center gap-2 w-[140px] text-center justify-center rounded-full border border-green-600 text-green-700 hover:bg-green-600 hover:text-white transition-all font-semibold text-sm px-5 py-2"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+              </svg>
+              LogIn
+            </a>
+            <a
+              href="/register"
+              className="inline-flex items-center gap-2 w-[140px] text-center justify-center rounded-full bg-green-600 hover:bg-green-700 transition-all text-white font-semibold text-sm px-5 py-2 shadow-sm"
+            >
+              Create Account
+            </a>
+          </div>
         </div>
-      </div>
+      )}
 
 {/* STATS BAR */}
 <section className="bg-white border-y border-slate-100 py-8">

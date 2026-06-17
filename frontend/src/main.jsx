@@ -29,15 +29,18 @@ import NotFound from './components/NotFound.jsx'
 import { WalletProvider } from './contexts/WalletContext.jsx'
 import { AuthProvider } from './contexts/AuthContext.jsx'
 import { LanguageProvider } from './contexts/LanguageContext.jsx'
+import RequireAuth from './components/RequireAuth.jsx'
 
 const router = createBrowserRouter(createRoutesFromElements(
   <>
     <Route path='/' element={<App />}>
       <Route index element={<Home />} />
-      <Route path='booking' element={<TicketBooking />} />
-      <Route path='booking/select' element={<SeatSelection />} />
-      <Route path='booking/ticket' element={<TicketDownload />} />
-      <Route path='bookings' element={<Bookings />} />
+      <Route path='booking' element={<RequireAuth><TicketBooking /></RequireAuth>} />
+      <Route path='booking/select' element={<RequireAuth><SeatSelection /></RequireAuth>} />
+      <Route path='booking/ticket' element={<RequireAuth><TicketDownload /></RequireAuth>} />
+      <Route path='bookings' element={<RequireAuth><Bookings /></RequireAuth>} />
+      <Route path='wallet' element={<RequireAuth><Wallet /></RequireAuth>} />
+      <Route path='payment' element={<RequireAuth><PaymentPage /></RequireAuth>} />
       <Route path='contact' element={<Contact />} />
       <Route path='*' element={<NotFound />} />
       <Route path='about' element={<About />} />
@@ -45,9 +48,7 @@ const router = createBrowserRouter(createRoutesFromElements(
       <Route path='register' element={<Register />} />
       <Route path='owner-register' element={<OwnerRegister />} />
       <Route path='owner/bus-setup' element={<BusSetup />} />
-      <Route path='profile' element={<Profile />} />
-      <Route path='wallet' element={<Wallet />} />
-      <Route path='payment' element={<PaymentPage />} />
+      <Route path='profile' element={<RequireAuth><Profile /></RequireAuth>} />
     </Route>
   </>
 ))

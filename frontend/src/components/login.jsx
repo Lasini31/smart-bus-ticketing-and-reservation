@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-
-const authStorageKey = 'smart-bus-user'
-const authEventName = 'smart-bus-auth-changed'
+import { useAuth } from '../contexts/AuthContext.jsx'
 
 export default function Login() {
     const navigate = useNavigate()
+    const { setUser } = useAuth()
     const [name, setName] = useState('')
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
@@ -16,10 +15,8 @@ export default function Login() {
             alert('Please enter both your name and password.')
             return
         }
-        
-        // Securely simulate storage (In a real app, you'd send this to an API)
-        localStorage.setItem(authStorageKey, JSON.stringify({ name: name.trim() || 'Traveler' }))
-        window.dispatchEvent(new Event(authEventName))
+
+        setUser({ name: name.trim() || 'Traveler', token: 'demo-token' })
         navigate('/')
     }
 
