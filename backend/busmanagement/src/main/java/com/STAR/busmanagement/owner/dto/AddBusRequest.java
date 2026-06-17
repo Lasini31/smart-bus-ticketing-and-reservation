@@ -6,5 +6,7 @@ import lombok.Data;
 public class AddBusRequest {
     private String busNo;
     private String routeId;
-    private String seatTemplate;
+    private String busTypeId;
+    private String ownerId;
+    private String status;
 }

@@ -6,8 +6,16 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: https://YOUR_PROJECT.supabase.co/auth/v1/keys
+          jwk-set-uri: ${env.SUPABASE_URL}/auth/v1/keys
+
+env:
+  SUPABASE_URL: https://rpbufjokybeukqcdfumq.supabase.co
+  SUPABASE_API_KEY: sb_publishable_zWjaFipP-Rn95FQ44BRKbg_9WqwSPpi
 
 app:
   auth:
-    mock: true
+    mock: false
+
+logging:
+  level:
+    org.springframework.web.client: DEBUG
