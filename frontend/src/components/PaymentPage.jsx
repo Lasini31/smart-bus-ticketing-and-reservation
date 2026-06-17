@@ -2,17 +2,19 @@ import { useState } from "react";
 import PersonalDetailsForm from '../components/payment/PersonalDetailsForm'
 import CardDetailsForm from '../components/payment/CardDetailsForm'
 import PaymentMethodSelector from "../components/payment/PaymentMethodSelector";
-import { Lock, CreditCard, Wallet} from 'lucide-react'
-import { useNavigate } from "react-router-dom";
-import DOMPurify from 'dompurify'
+import { Lock, Wallet } from 'lucide-react'
+import { useNavigate, useLocation } from "react-router-dom";
+import { useWallet } from '../contexts/WalletContext.jsx';
 
 export default function PaymentPage() {
     const navigate = useNavigate()
+    const { state: locationState } = useLocation()
+    const { balance, topUp } = useWallet()
 
     {/*Personal details state*/}
     const [address, setAddress] = useState('')
     const [city, setCity] = useState('')
-    const [state, setState] = useState('')
+    const [region, setRegion] = useState('')
     const [postalCode, setPostalCode] = useState('')
 
     {/*Payment state*/}
@@ -23,13 +25,13 @@ export default function PaymentPage() {
     const [cvc, setCvc] = useState('')
 
     {/*Top-up amount*/}
-    const [amount, setAmount] = useState('')
+    const [amount, setAmount] = useState(locationState?.amount ? String(locationState.amount) : '')
 
     {/*UI state*/}
     const [errors, setErrors] = useState({})
     const [isLoading, setIsLoading] = useState(false)
     const [showPopup, setShowPopup] = useState(false)
-    const [popupMessage, setPopupMessage] = useState({success: true, text: ''})
+    const [popupMessage, setPopupMessage] = useState({ success: false, text: '' })
     const [isRateLimited, setIsRateLimited] = useState(false)
 
     {/*
@@ -42,7 +44,7 @@ export default function PaymentPage() {
     //   .eq('passenger_id', user.id)
     //   .single() */}
 
-    const [walletBalance, setWalletBalance] = useState(2500.00)
+    const walletBalance = balance
 
     const handleAmountChange = (e) => {
         const value = e.target.value
@@ -135,7 +137,7 @@ export default function PaymentPage() {
         //Change this part too
         if (success) {
             // TODO: Remove dummy balance update
-            setWalletBalance(prev => prev + parseFloat(amount))
+            topUp(parseFloat(amount))
             setPopupMessage({ success: true, text: `LKR ${parseFloat(amount).toFixed(2)} added to your wallet!` })
             } else {
             setPopupMessage({ success: false, text: 'Payment failed. Please check your card details and try again.' })
@@ -148,7 +150,7 @@ export default function PaymentPage() {
 
     const handlePopupClose = () => {
         setShowPopup(false)
-        if (popupMessage.success){
+        if (popupMessage.success) {
             navigate('/wallet')
         }
     }
@@ -217,7 +219,7 @@ export default function PaymentPage() {
                 <PersonalDetailsForm
                     address={address} setAddress={setAddress}
                     city={city} setCity={setCity}
-                    state={state} setState={setState}
+                    state={region} setState={setRegion}
                     postalCode={postalCode} setPostalCode={setPostalCode}
                     errors={errors}
                 />

@@ -13,13 +13,13 @@ import java.util.Map;
 @Service
 public class SupabaseOwnerService implements OwnerService {
 
-    @Value("${env.SUPABASE_URL}")
+    @Value("${env.VITE_SUPABASE_URL}")
     private String supabaseUrl;
 
-    @Value("${env.SUPABASE_SERVICE_KEY}")
+    @Value("${env.VITE_SUPABASE_PUBLISHABLE_KEY}")
     private String serviceKey;
 
-    @Value("${env.SUPABASE_API_KEY}")
+    @Value("${env.VITE_API_BASE}")
     private String apiKey;
 
     private final RestTemplate restTemplate = new RestTemplate();

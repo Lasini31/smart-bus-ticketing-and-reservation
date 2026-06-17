@@ -31,3 +31,17 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Hide real config file with keys
+src/main/resources/application.yml.example
+
+# Hide any local environment files
+.env
+*.env
+
+# IntelliJ files
+.idea/
+*.iml
+
+# Build files
+target/
