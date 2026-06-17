@@ -80,6 +80,18 @@ public class SupabaseAuthService implements AuthService{
 
     Map<String, Object> user = (Map<String, Object>) resp.get("user");
 
+    // When email confirmation is enabled, Supabase returns no token or user object.
+    // Registration still succeeded — the Supabase trigger will set the role in
+    // app_metadata when the user clicks the confirmation link.
+    if (user == null || token == null) {
+        return AuthResponse.builder()
+                .token(null)
+                .role(request.getRole())
+                .userId(null)
+                .build();
+    }
+
+    // Email confirmation disabled — user is immediately active
     String userId = (String) user.get("id");
 
     return AuthResponse.builder()

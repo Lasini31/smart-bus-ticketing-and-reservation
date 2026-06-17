@@ -28,10 +28,6 @@ public class SecurityConfig {
             http
                     .authorizeHttpRequests(auth -> auth
                             .requestMatchers("/auth/**").permitAll()
-                            .requestMatchers("/users/**").permitAll()
-                            .requestMatchers("/routes/**").permitAll()
-                            .requestMatchers("/trips/**").permitAll()
-                            .requestMatchers("/bookings/**").permitAll()
                             .anyRequest().authenticated()
                     )
                     .oauth2ResourceServer(oauth -> oauth
