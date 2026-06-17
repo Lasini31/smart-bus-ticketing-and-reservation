@@ -5,12 +5,15 @@ import { useWallet } from '../contexts/WalletContext.jsx'
 const TOP_UP_OPTIONS = [500, 1000, 2000, 5000]
 
 export default function Wallet() {
-  const { balance, transactions, refund } = useWallet()
+  const { balance, transactions, refund, cancelBooking } = useWallet()
   const [selectedAmount, setSelectedAmount] = useState(1000)
   const [customTopUp, setCustomTopUp] = useState('')
   const [refundAmount, setRefundAmount] = useState('')
   const [refundReason, setRefundReason] = useState('')
   const [visibleCount, setVisibleCount] = useState(20)
+  const [showCancelModal, setShowCancelModal] = useState(false)
+  const [cancelReason, setCancelReason] = useState('')
+  const [selectedTransaction, setSelectedTransaction] = useState(null)
   const navigate = useNavigate()
 
   const availableSpending = useMemo(() => balance.toFixed(2), [balance])
@@ -18,6 +21,19 @@ export default function Wallet() {
   const lastTopUp = useMemo(() => {
     const topUpTx = transactions.find(tx => tx.label === 'Top-up' && tx.amount > 0)
     return topUpTx ? topUpTx.amount.toFixed(2) : '0.00'
+  }, [transactions])
+
+  const spentThisMonth = useMemo(() => {
+    const now = new Date()
+    const month = now.getMonth()
+    const year = now.getFullYear()
+
+    return transactions.reduce((sum, tx) => {
+      if (tx.amount >= 0 || tx.status === 'Cancelled') return sum
+      const txDate = new Date(tx.date)
+      if (txDate.getMonth() !== month || txDate.getFullYear() !== year) return sum
+      return sum + Math.abs(tx.amount)
+    }, 0)
   }, [transactions])
 
   // Get current visible history chunk
@@ -41,6 +57,21 @@ export default function Wallet() {
     refund(amount, refundReason)
     setRefundAmount('')
     setRefundReason('')
+  }
+
+  function handleCancelBooking() {
+    if (!cancelReason.trim()) {
+      alert('Please enter a cancellation reason')
+      return
+    }
+
+    if (selectedTransaction) {
+      cancelBooking(selectedTransaction.id, cancelReason)
+    }
+
+    setShowCancelModal(false)
+    setCancelReason('')
+    setSelectedTransaction(null)
   }
 
   return (
@@ -89,7 +120,7 @@ export default function Wallet() {
                 </div>
                 <div className="rounded-xl bg-slate-50 p-4 border border-slate-100">
                   <p className="text-xs font-medium text-slate-500">Spent This Month</p>
-                  <p className="mt-1.5 text-xl font-bold text-rose-600">Rs. 740.00</p>
+                  <p className="mt-1.5 text-xl font-bold text-rose-600">Rs. {spentThisMonth.toFixed(2)}</p>
                 </div>
                 <div className="rounded-xl bg-slate-50 p-4 border border-slate-100">
                   <p className="text-xs font-medium text-slate-500">Last Registered Top-Up</p>
@@ -111,7 +142,18 @@ export default function Wallet() {
               </div>
 
               {/* INDEPENDENT INTERNAL SCROLL BOX */}
-              <div className="overflow-y-auto max-h-[580px] p-5 space-y-3 custom-scrollbar bg-slate-50/30">
+              <div
+                className="
+                  overflow-y-auto
+                  max-h-[700px]
+                  p-5
+                  space-y-3
+                  bg-slate-50/30
+                  scrollbar-thin
+                  scrollbar-thumb-slate-400
+                  scrollbar-track-slate-100
+                "
+              >
                 {visibleTransactions.length === 0 ? (
                   <div className="text-center py-12 text-slate-400 text-sm">
                     No transactions captured yet.
@@ -135,13 +177,64 @@ export default function Wallet() {
                           <p className="text-xs text-slate-400 mt-0.5">{tx.date}</p>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-0 pt-3 sm:pt-0 border-slate-100">
+                      <div className="flex items-center justify-between sm:justify-end gap-4 flex-wrap border-t sm:border-0 pt-3 sm:pt-0 border-slate-100">
                         <p className={`text-sm font-bold tracking-tight ${tx.amount >= 0 ? 'text-emerald-600' : 'text-slate-900'}`}>
                           {tx.amount >= 0 ? '+' : '-'} Rs. {Math.abs(tx.amount).toFixed(2)}
                         </p>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${tx.status === 'Completed' ? 'bg-slate-100 text-slate-700' : 'bg-amber-50 text-amber-700'}`}>
-                          {tx.status}
-                        </span>
+                        {!(
+                          tx.label.toLowerCase().includes('bus') ||
+                          tx.label.toLowerCase().includes('ticket') ||
+                          tx.label.toLowerCase().includes('booking')
+                        ) && (
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${tx.status === 'Completed' ? 'bg-slate-100 text-slate-700' : 'bg-amber-50 text-amber-700'}`}>
+                            {tx.status}
+                          </span>
+                        )}
+                        {(
+                          tx.label.toLowerCase().includes('bus') ||
+                          tx.label.toLowerCase().includes('ticket') ||
+                          tx.label.toLowerCase().includes('booking')
+                        ) && (
+                          tx.status === 'Cancelled' ? (
+                            <span
+                              className="
+                                px-3 py-1.5
+                                rounded-lg
+                                text-xs
+                                font-semibold
+                                bg-slate-100
+                                text-slate-500
+                                border
+                                border-slate-200
+                                cursor-not-allowed
+                              "
+                            >
+                              Booking Cancelled
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedTransaction(tx)
+                                setShowCancelModal(true)
+                              }}
+                              className="
+                                px-3 py-1.5
+                                rounded-lg
+                                text-xs
+                                font-semibold
+                                bg-red-50
+                                text-red-600
+                                border
+                                border-red-200
+                                hover:bg-red-100
+                                transition
+                              "
+                            >
+                              Cancel Booking
+                            </button>
+                          )
+                        )}
                       </div>
                     </div>
                   ))
@@ -286,6 +379,55 @@ export default function Wallet() {
           </aside>
         </main>
       </div>
+
+      {showCancelModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl">
+
+            <div className="p-6 border-b border-slate-100">
+              <h2 className="text-lg font-bold text-slate-900">
+                Cancel Booking
+              </h2>
+              <p className="text-sm text-slate-500 mt-1">
+                Please provide a reason for cancellation.
+              </p>
+            </div>
+
+            <div className="p-6">
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Type cancellation reason..."
+                rows={4}
+                className="w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/10"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 p-6 border-t border-slate-100">
+              <button
+                onClick={() => {
+                  setShowCancelModal(false)
+                  setCancelReason('')
+                }}
+                className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"
+              >
+                Close
+              </button>
+
+              <button
+                onClick={handleCancelBooking}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
+              >
+                Confirm Cancellation
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+
+
     </div>
   )
 }

@@ -80,13 +80,40 @@ export function WalletProvider({ children }) {
     return true;
   };
 
+  const cancelBooking = (transactionId, reason) => {
+    let refundAmount = 0
+
+    setTransactions(prev => {
+      const transactionToCancel = prev.find(tx => tx.id === transactionId)
+      if (!transactionToCancel || transactionToCancel.status === 'Cancelled') return prev
+
+      if (transactionToCancel.amount < 0) {
+        refundAmount = Math.abs(transactionToCancel.amount)
+      }
+
+      return prev.map(tx =>
+        tx.id === transactionId
+          ? {
+              ...tx,
+              status: 'Cancelled',
+              cancelledReason: reason || 'Booking cancelled by user'
+            }
+          : tx
+      )
+    })
+
+    if (refundAmount > 0) {
+      setBalance(prev => Number((prev + refundAmount).toFixed(2)))
+    }
+  };
+
   const value = useMemo(() => ({
     balance,
     transactions,
     topUp,
-    deduct
-    ,
-    refund
+    deduct,
+    refund,
+    cancelBooking
   }), [balance, transactions]);
 
   return (
