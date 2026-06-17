@@ -51,7 +51,9 @@ public class SupabaseAuthService implements AuthService{
 
         Map<String, Object> metadata = (Map<String, Object>) user.get("app_metadata");
 
-        String role = metadata != null ? metadata.get("role").toString() : "passenger";
+        String role = (metadata != null && metadata.get("role") != null)
+                ? metadata.get("role").toString()
+                : "passenger";
 
         return AuthResponse.builder()
                 .token(token)
@@ -71,7 +73,7 @@ public class SupabaseAuthService implements AuthService{
     Map<String, Object> body = Map.of(
             "email", request.getEmail(),
             "password", request.getPassword(),
-            "data", Map.of("role", "passenger") // default role
+            "data", Map.of("role", request.getRole()) 
     );
 
     HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
@@ -85,11 +87,23 @@ public class SupabaseAuthService implements AuthService{
 
     Map<String, Object> user = (Map<String, Object>) resp.get("user");
 
+    // When email confirmation is enabled, Supabase returns no token or user object.
+    // Registration still succeeded — the Supabase trigger will set the role in
+    // app_metadata when the user clicks the confirmation link.
+    if (user == null || token == null) {
+        return AuthResponse.builder()
+                .token(null)
+                .role(request.getRole())
+                .userId(null)
+                .build();
+    }
+
+    // Email confirmation disabled — user is immediately active
     String userId = (String) user.get("id");
 
     return AuthResponse.builder()
             .token(token)
-            .role("passenger")
+            .role(request.getRole())
             .userId(userId)
             .build();
     }
@@ -139,7 +153,9 @@ public class SupabaseAuthService implements AuthService{
 
     Map<String, Object> metadata = (Map<String, Object>) user.get("app_metadata");
 
-    String role = metadata != null ? metadata.get("role").toString() : "passenger";
+    String role = (metadata != null && metadata.get("role") != null)
+            ? metadata.get("role").toString()
+            : "passenger";
 
     return AuthResponse.builder()
             .token(token)
