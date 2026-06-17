@@ -2,7 +2,7 @@ import { createContext, useContext, useMemo, useState } from 'react'
 
 const AuthContext = createContext(null)
 const AUTH_STORAGE_KEY = 'smart-bus-user'
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8080'
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8081'
 
 export function AuthProvider({ children }) {
   const [user, setUserState] = useState(() => {

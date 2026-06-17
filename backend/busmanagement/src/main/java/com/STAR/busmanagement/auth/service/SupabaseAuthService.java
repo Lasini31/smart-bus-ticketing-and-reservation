@@ -4,31 +4,24 @@ import com.STAR.busmanagement.auth.dto.*;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Map;
 
 @Service
 public class SupabaseAuthService implements AuthService{
 
-    @Value("${env.SUPERBASE_URL}")
-    private String supabaseUrl;
-
-    @Value("${env.SUPERBASE_API_KEY}")
-    private String apiKey;
-
-
-    
+    private final String SUPABASE_URL = "https://rpbufjokybeukqcdfumq.supabase.co";
+    private final String API_KEY = "sb_publishable_zWjaFipP-Rn95FQ44BRKbg_9WqwSPpi";
 
     private final RestTemplate restTemplate = new RestTemplate();
 
     public AuthResponse login(LoginRequest request) {
 
-        String url = supabaseUrl + "/auth/v1/token?grant_type=password";
+        String url = SUPABASE_URL + "/auth/v1/token?grant_type=password";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("apikey", apiKey);
+        headers.set("apikey", API_KEY);
 
         Map<String, String> body = Map.of(
                 "email", request.getUsername(),
@@ -51,7 +44,9 @@ public class SupabaseAuthService implements AuthService{
 
         Map<String, Object> metadata = (Map<String, Object>) user.get("app_metadata");
 
-        String role = metadata != null ? metadata.get("role").toString() : "passenger";
+        String role = (metadata != null && metadata.get("role") != null)
+                ? metadata.get("role").toString()
+                : "passenger";
 
         return AuthResponse.builder()
                 .token(token)
@@ -62,16 +57,16 @@ public class SupabaseAuthService implements AuthService{
 
     public AuthResponse register(RegisterRequest request) {
 
-    String url = supabaseUrl + "/auth/v1/signup";
+    String url = SUPABASE_URL + "/auth/v1/signup";
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.set("apikey", apiKey);
+    headers.set("apikey", API_KEY);
 
     Map<String, Object> body = Map.of(
             "email", request.getEmail(),
             "password", request.getPassword(),
-            "data", Map.of("role", "passenger") // default role
+            "data", Map.of("role", request.getRole()) 
     );
 
     HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
@@ -85,22 +80,34 @@ public class SupabaseAuthService implements AuthService{
 
     Map<String, Object> user = (Map<String, Object>) resp.get("user");
 
+    // When email confirmation is enabled, Supabase returns no token or user object.
+    // Registration still succeeded — the Supabase trigger will set the role in
+    // app_metadata when the user clicks the confirmation link.
+    if (user == null || token == null) {
+        return AuthResponse.builder()
+                .token(null)
+                .role(request.getRole())
+                .userId(null)
+                .build();
+    }
+
+    // Email confirmation disabled — user is immediately active
     String userId = (String) user.get("id");
 
     return AuthResponse.builder()
             .token(token)
-            .role("passenger")
+            .role(request.getRole())
             .userId(userId)
             .build();
     }
 
     public void forgotPassword(ForgotPasswordRequest request) {
 
-    String url = supabaseUrl + "/auth/v1/recover";
+    String url = SUPABASE_URL + "/auth/v1/recover";
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.set("apikey", apiKey                );
+    headers.set("apikey", API_KEY);
 
     Map<String, String> body = Map.of(
             "email", request.getEmail()
@@ -113,11 +120,11 @@ public class SupabaseAuthService implements AuthService{
 
     public AuthResponse loginWithGoogle(GoogleLoginRequest request) {
 
-    String url = supabaseUrl + "/auth/v1/token?grant_type=id_token";
+    String url = SUPABASE_URL + "/auth/v1/token?grant_type=id_token";
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.set("apikey", apiKey);
+    headers.set("apikey", API_KEY);
 
     Map<String, String> body = Map.of(
             "provider", "google",
@@ -139,7 +146,9 @@ public class SupabaseAuthService implements AuthService{
 
     Map<String, Object> metadata = (Map<String, Object>) user.get("app_metadata");
 
-    String role = metadata != null ? metadata.get("role").toString() : "passenger";
+    String role = (metadata != null && metadata.get("role") != null)
+            ? metadata.get("role").toString()
+            : "passenger";
 
     return AuthResponse.builder()
             .token(token)
@@ -150,10 +159,10 @@ public class SupabaseAuthService implements AuthService{
     
     public void logout(String token) {
 
-    String url = supabaseUrl + "/auth/v1/logout";
+    String url = SUPABASE_URL + "/auth/v1/logout";
 
     HttpHeaders headers = new HttpHeaders();
-    headers.set("apikey", apiKey);
+    headers.set("apikey", API_KEY);
     headers.set("Authorization", "Bearer " + token);
 
     HttpEntity<Void> entity = new HttpEntity<>(headers);

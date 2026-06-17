@@ -82,17 +82,15 @@ export default function Register() {
     }
 
     // --- PREPARE DATA FOR BACKEND ---
-    const userData = {
-      role: role, 
-      name: name,
-      password: password,
-      phone: phone,
-      email: email
-    };
+const userData = {
+  email: email,
+  password: password,
+  role: role
+};
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/register', {
+      const response = await fetch('http://localhost:8081/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -108,9 +106,9 @@ export default function Register() {
         setConfirmPassword('');
         // If owner, redirect to bus setup
         if (role === 'owner') {
-          navigate('/owner/bus-setup');
+          navigate('/owner/bus-setup');  
         } else {
-          navigate('/login'); 
+          navigate('/'); //////////////////////////////////////////////////////////
         }
       } else {
         setErrorMessage(data.message || "Registration failed. Please try again.");
