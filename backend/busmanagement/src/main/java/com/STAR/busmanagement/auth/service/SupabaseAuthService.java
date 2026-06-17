@@ -11,11 +11,9 @@ import java.util.Map;
 @Service
 public class SupabaseAuthService implements AuthService{
 
-    @Value("${env.SUPERBASE_URL}")
-    private String supabaseUrl;
+    private final String SUPABASE_URL = "https://rpbufjokybeukqcdfumq.supabase.co";
+    private final String API_KEY = "sb_publishable_zWjaFipP-Rn95FQ44BRKbg_9WqwSPpi";
 
-    @Value("${env.SUPERBASE_API_KEY}")
-    private String apiKey;
 
 
     
@@ -24,11 +22,11 @@ public class SupabaseAuthService implements AuthService{
 
     public AuthResponse login(LoginRequest request) {
 
-        String url = supabaseUrl + "/auth/v1/token?grant_type=password";
+        String url = SUPABASE_URL + "/auth/v1/token?grant_type=password";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("apikey", apiKey);
+        headers.set("apikey", API_KEY);
 
         Map<String, String> body = Map.of(
                 "email", request.getUsername(),
@@ -64,11 +62,11 @@ public class SupabaseAuthService implements AuthService{
 
     public AuthResponse register(RegisterRequest request) {
 
-    String url = supabaseUrl + "/auth/v1/signup";
+    String url = SUPABASE_URL + "/auth/v1/signup";
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.set("apikey", apiKey);
+    headers.set("apikey", API_KEY);
 
     Map<String, Object> body = Map.of(
             "email", request.getEmail(),
@@ -110,11 +108,11 @@ public class SupabaseAuthService implements AuthService{
 
     public void forgotPassword(ForgotPasswordRequest request) {
 
-    String url = supabaseUrl + "/auth/v1/recover";
+    String url = SUPABASE_URL + "/auth/v1/recover";
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.set("apikey", apiKey                );
+    headers.set("apikey", API_KEY                );
 
     Map<String, String> body = Map.of(
             "email", request.getEmail()
@@ -127,11 +125,11 @@ public class SupabaseAuthService implements AuthService{
 
     public AuthResponse loginWithGoogle(GoogleLoginRequest request) {
 
-    String url = supabaseUrl + "/auth/v1/token?grant_type=id_token";
+    String url = SUPABASE_URL + "/auth/v1/token?grant_type=id_token";
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.set("apikey", apiKey);
+    headers.set("apikey", API_KEY);
 
     Map<String, String> body = Map.of(
             "provider", "google",
@@ -166,10 +164,10 @@ public class SupabaseAuthService implements AuthService{
     
     public void logout(String token) {
 
-    String url = supabaseUrl + "/auth/v1/logout";
+    String url = SUPABASE_URL + "/auth/v1/logout";
 
     HttpHeaders headers = new HttpHeaders();
-    headers.set("apikey", apiKey);
+    headers.set("apikey", API_KEY);
     headers.set("Authorization", "Bearer " + token);
 
     HttpEntity<Void> entity = new HttpEntity<>(headers);
