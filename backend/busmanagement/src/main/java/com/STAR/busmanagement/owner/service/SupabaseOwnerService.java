@@ -16,6 +16,9 @@ public class SupabaseOwnerService implements OwnerService {
     @Value("${env.SUPABASE_URL}")
     private String supabaseUrl;
 
+    @Value("${env.SUPABASE_SERVICE_KEY}")
+    private String serviceKey;
+
     @Value("${env.SUPABASE_API_KEY}")
     private String apiKey;
 
@@ -24,8 +27,8 @@ public class SupabaseOwnerService implements OwnerService {
     private HttpHeaders getHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("apikey", apiKey);
-        headers.set("Authorization", "Bearer " + apiKey);
+        headers.set("apikey", serviceKey);
+        headers.set("Authorization", "Bearer " + serviceKey);
         headers.set("Prefer", "return=representation");
         headers.set("Accept-Profile", "public");
         headers.set("Content-Profile", "public");
@@ -46,7 +49,7 @@ public class SupabaseOwnerService implements OwnerService {
         );
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, getHeaders());
-        restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
+        restTemplate.exchange(url, HttpMethod.POST, entity, Object.class);
 
         return MessageResponse.builder()
                 .success(true)
@@ -80,7 +83,7 @@ public class SupabaseOwnerService implements OwnerService {
         );
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, getHeaders());
-        restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
+        restTemplate.exchange(url, HttpMethod.POST, entity, Object.class);
 
         return DriverResponse.builder()
                 .name(request.getName())
@@ -115,7 +118,7 @@ public class SupabaseOwnerService implements OwnerService {
         );
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, getHeaders());
-        restTemplate.exchange(url, HttpMethod.PATCH, entity, Map.class);
+        restTemplate.exchange(url, HttpMethod.PATCH, entity, Object.class);
 
         return MessageResponse.builder()
                 .success(true)
