@@ -62,6 +62,20 @@ export function WalletProvider({ children }) {
     return true;
   };
 
+  const setBalanceFromServer = (newBalance, topUpAmount) => {
+    setBalance(Number(Number(newBalance).toFixed(2)))
+    setTransactions(prev => [
+      {
+        id: prev.length + 1,
+        label: 'Top-up via Stripe',
+        amount: Number(topUpAmount),
+        date: new Date().toISOString().slice(0, 10),
+        status: 'Completed'
+      },
+      ...prev
+    ])
+  }
+
   const refund = (amount, reason) => {
     if (amount <= 0) {
       return false;
@@ -113,7 +127,8 @@ export function WalletProvider({ children }) {
     topUp,
     deduct,
     refund,
-    cancelBooking
+    cancelBooking,
+    setBalanceFromServer
   }), [balance, transactions]);
 
   return (

@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "88498d7d-5806-41d7-aa9f-1051734ec75c",
     "name": "Bus Management API",
-    "description": "### Welcome to Postman! This is your first collection.\n\nCollections are your starting point for building and testing APIs. You can use this one to:\n\n• Group related requests  \n• Test your API in real-world scenarios  \n• Document and share your requests\n\nUpdate the name and overview whenever you’re ready to make it yours.\n\n[Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)",
+    "description": "STAR Smart Bus Ticketing and Reservation System — Full API collection including Authentication and Stripe Wallet Top-up.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "54091481",
     "_collection_link": "https://go.postman.co/collection/54091481-88498d7d-5806-41d7-aa9f-1051734ec75c?source=collection_link"
@@ -73,7 +73,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"username\": \"oshanimaduwage@hotmail.com\",\r\n    \"password\": \"password123\"\r\n}",
+              "raw": "{\r\n    \"username\": \"starbus.passenger@gmail.com\",\r\n    \"password\": \"Test@1234\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -269,6 +269,470 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Stripe Wallet Top-up",
+      "description": "Endpoints for topping up a passenger wallet using Stripe Checkout. Run in order: first LOGIN (above), then Create Checkout Session, then complete payment on Stripe's page, then Get Top-up Status.",
+      "item": [
+        {
+          "name": "1 - Create Top-up Checkout Session",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Make sure you ran LOGIN first so {{authToken}} is set.",
+                  "const token = pm.collectionVariables.get('authToken');",
+                  "if (!token) {",
+                  "    console.warn('⚠️ authToken is empty — run LOGIN first!');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Response has checkoutUrl\", function () {",
+                  "    pm.expect(response.checkoutUrl).to.be.a('string').and.to.include('checkout.stripe.com');",
+                  "});",
+                  "",
+                  "pm.test(\"Status is pending\", function () {",
+                  "    pm.expect(response.status).to.equal('pending');",
+                  "});",
+                  "",
+                  "pm.test(\"Currency is lkr\", function () {",
+                  "    pm.expect(response.currency).to.equal('lkr');",
+                  "});",
+                  "",
+                  "pm.test(\"Response has paymentId\", function () {",
+                  "    pm.expect(response.paymentId).to.be.a('number');",
+                  "});",
+                  "",
+                  "// Auto-save the session ID for use in the status check request",
+                  "if (response.checkoutSessionId) {",
+                  "    pm.collectionVariables.set('checkoutSessionId', response.checkoutSessionId);",
+                  "    console.log('✅ Checkout session ID saved: ' + response.checkoutSessionId);",
+                  "    console.log('');",
+                  "    console.log('👉 NEXT STEP: Open this URL in your browser to complete payment:');",
+                  "    console.log(response.checkoutUrl);",
+                  "    console.log('');",
+                  "    console.log('Use Stripe test card: 4242 4242 4242 4242 | Any future date | Any CVC');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"amount\": 1500.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/topups/checkout-session",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "topups",
+                "checkout-session"
+              ]
+            },
+            "description": "Creates a Stripe Checkout Session for a passenger wallet top-up.\n\n**Requires:** Passenger JWT (run LOGIN first).\n\n**Body:** `{ \"amount\": 1500.00 }` — amount in LKR (min 100, max 50000).\n\n**After running:** Copy the `checkoutUrl` from the response and open it in your browser. Use Stripe test card `4242 4242 4242 4242` to simulate a successful payment."
+          },
+          "response": []
+        },
+        {
+          "name": "2 - Get Top-up Status (by Session ID)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const sessionId = pm.collectionVariables.get('checkoutSessionId');",
+                  "if (!sessionId) {",
+                  "    console.warn('⚠️ checkoutSessionId is empty — run Create Checkout Session first!');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Response has paymentId\", function () {",
+                  "    pm.expect(response.paymentId).to.exist;",
+                  "});",
+                  "",
+                  "pm.test(\"Response has status field\", function () {",
+                  "    pm.expect(response.status).to.be.oneOf(['pending', 'completed', 'failed', 'expired']);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has walletBalance\", function () {",
+                  "    pm.expect(response.walletBalance).to.be.a('number');",
+                  "});",
+                  "",
+                  "const status = response.status;",
+                  "const balance = response.walletBalance;",
+                  "console.log('Payment status: ' + status);",
+                  "console.log('Wallet balance: LKR ' + balance);",
+                  "",
+                  "if (status === 'completed') {",
+                  "    console.log('✅ Payment completed! Wallet was credited LKR ' + response.amount);",
+                  "} else if (status === 'pending') {",
+                  "    console.log('⏳ Still pending — webhook may not have arrived yet. Wait a moment and try again.');",
+                  "} else {",
+                  "    console.log('❌ Payment did not complete. Status: ' + status);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/topups/sessions/{{checkoutSessionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "topups",
+                "sessions",
+                "{{checkoutSessionId}}"
+              ]
+            },
+            "description": "Checks the current status of a top-up payment and returns the latest wallet balance.\n\n**Requires:** Passenger JWT + the session ID saved from step 1 (auto-saved as `{{checkoutSessionId}}`).\n\n**Run this after completing (or cancelling) the Stripe checkout page.**\n\nIf status is still `pending`, the webhook has not arrived yet. Wait 2-3 seconds and run again."
+          },
+          "response": []
+        },
+        {
+          "name": "3 - Stripe Webhook (Manual Simulation)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// NOTE: This request is for UNDERSTANDING ONLY.",
+                  "// In real testing, Stripe CLI sends this automatically.",
+                  "// You cannot send a real webhook from Postman because",
+                  "// the Stripe-Signature header requires a secret + timestamp + HMAC.",
+                  "//",
+                  "// To properly test the webhook, use Stripe CLI:",
+                  "//   stripe listen --forward-to http://localhost:8081/payments/stripe/webhook",
+                  "//",
+                  "// To trigger a test event manually via CLI:",
+                  "//   stripe trigger checkout.session.completed",
+                  "console.log('⚠️ This request will be REJECTED by the backend because the Stripe-Signature is fake.');",
+                  "console.log('Use Stripe CLI to test the webhook properly.');"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// The webhook requires a valid Stripe-Signature header.",
+                  "// When sent from Postman with a fake signature, the backend will return 400.",
+                  "// This is CORRECT and EXPECTED behavior — it means signature verification works!",
+                  "pm.test(\"Backend correctly rejects fake webhook signature (400)\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "pm.test(\"Error code is STRIPE_SIGNATURE_INVALID\", function () {",
+                  "    pm.expect(response.error.code).to.equal('STRIPE_SIGNATURE_INVALID');",
+                  "});",
+                  "",
+                  "console.log('✅ Backend correctly rejected the fake signature. Security works!');",
+                  "console.log('To test a REAL webhook, use Stripe CLI.');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Stripe-Signature",
+                "value": "t=1234567890,v1=fake_signature_for_testing_rejection",
+                "description": "This is a fake signature. The backend will correctly reject it with 400. This tests that security verification is working."
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"id\": \"evt_test_000000000000\",\n    \"type\": \"checkout.session.completed\",\n    \"data\": {\n        \"object\": {\n            \"id\": \"{{checkoutSessionId}}\",\n            \"payment_status\": \"paid\",\n            \"payment_intent\": \"pi_test_000000000000\"\n        }\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/stripe/webhook",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "stripe",
+                "webhook"
+              ]
+            },
+            "description": "**This request is for SECURITY VERIFICATION only.**\n\nIt sends a fake `Stripe-Signature` header. The backend should reject it with `400 STRIPE_SIGNATURE_INVALID`. The test script verifies this rejection, confirming that the HMAC security check is working correctly.\n\n**To test the actual webhook flow (wallet credit),** use Stripe CLI:\n```\nstripe listen --forward-to http://localhost:8081/payments/stripe/webhook\n```\nThen complete a payment on the Stripe Checkout page and watch the Stripe CLI terminal."
+          },
+          "response": []
+        },
+        {
+          "name": "4 - Error: Amount Too Low (< 100 LKR)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Error code is INVALID_TOPUP_AMOUNT\", function () {",
+                  "    pm.expect(response.error.code).to.equal('INVALID_TOPUP_AMOUNT');",
+                  "});",
+                  "",
+                  "pm.test(\"Error message mentions minimum amount\", function () {",
+                  "    pm.expect(response.error.message).to.include('Minimum');",
+                  "});",
+                  "",
+                  "console.log('✅ Backend correctly rejected amount below minimum.');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"amount\": 50.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/topups/checkout-session",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "topups",
+                "checkout-session"
+              ]
+            },
+            "description": "Tests that the backend correctly rejects an amount below the LKR 100 minimum. Expected response: 400 with `INVALID_TOPUP_AMOUNT` error code."
+          },
+          "response": []
+        },
+        {
+          "name": "5 - Error: Amount Too High (> 50000 LKR)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test(\"Error code is INVALID_TOPUP_AMOUNT\", function () {",
+                  "    pm.expect(response.error.code).to.equal('INVALID_TOPUP_AMOUNT');",
+                  "});",
+                  "",
+                  "pm.test(\"Error message mentions maximum amount\", function () {",
+                  "    pm.expect(response.error.message).to.include('Maximum');",
+                  "});",
+                  "",
+                  "console.log('✅ Backend correctly rejected amount above maximum.');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"amount\": 99999.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/topups/checkout-session",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "topups",
+                "checkout-session"
+              ]
+            },
+            "description": "Tests that the backend correctly rejects an amount above the LKR 50,000 maximum. Expected response: 400 with `INVALID_TOPUP_AMOUNT` error code."
+          },
+          "response": []
+        },
+        {
+          "name": "6 - Error: No Auth Token (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status is 401 Unauthorized\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "console.log('✅ Backend correctly rejected unauthenticated request.');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"amount\": 1500.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/topups/checkout-session",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "topups",
+                "checkout-session"
+              ]
+            },
+            "description": "Tests that the endpoint is protected and cannot be accessed without a JWT. Expected response: 401 Unauthorized."
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "auth": {
@@ -308,7 +772,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": ""
+      "value": "http://localhost:8081"
     },
     {
       "key": "authToken",
@@ -317,6 +781,11 @@
     {
       "key": "userId",
       "value": ""
+    },
+    {
+      "key": "checkoutSessionId",
+      "value": "",
+      "description": "Auto-populated by the Create Checkout Session request. Used by the Get Top-up Status request."
     }
   ]
 }

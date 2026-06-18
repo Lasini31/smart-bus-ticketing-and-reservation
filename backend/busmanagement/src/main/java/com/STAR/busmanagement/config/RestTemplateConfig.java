@@ -9,6 +9,6 @@ public class RestTemplateConfig {
 
     @Bean
     public RestTemplate restTemplate() {
-        return new RestTemplate();
+        return new RestTemplate(new org.springframework.http.client.JdkClientHttpRequestFactory());
     }
 }

@@ -2,11 +2,13 @@ server:
   port: 8081
 
 spring:
+  profiles:
+    active: local
   security:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: https://rpbufjokybeukqcdfumq.supabase.co/auth/v1/keys
+          jwk-set-uri: https://rpbufjokybeukqcdfumq.supabase.co/auth/v1/.well-known/jwks.json
   datasource:
     url: jdbc:postgresql://db.rpbufjokybeukqcdfumq.supabase.co:5432/postgres
     username: postgres
@@ -28,3 +30,12 @@ env:
 app:
   auth:
     mock: false
+
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY:}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+  currency: lkr
+  success-url: ${STRIPE_SUCCESS_URL:http://localhost:5173/payment?stripe_status=success&session_id={CHECKOUT_SESSION_ID}}
+  cancel-url: ${STRIPE_CANCEL_URL:http://localhost:5173/payment?stripe_status=cancelled}
+  min-topup-amount: 100
+  max-topup-amount: 50000

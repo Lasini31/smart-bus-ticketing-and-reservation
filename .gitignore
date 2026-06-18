@@ -1,2 +1,27 @@
 node_modules/
 frontend/node_modules/
+
+# ===== SECRET FILES — NEVER COMMIT THESE =====
+application-local.yml
+application-local.yaml
+application-secrets.yml
+*.env
+.env
+.env.local
+.env.*
+
+# ===== Java/Maven build output =====
+target/
+*.class
+*.jar
+
+# ===== IDE files =====
+.idea/
+*.iml
+.vscode/settings.json
+
+# ===== Postman local files =====
+.postman/
+postman/collections/
+postman/environments/
+postman/globals/
