@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-function DriverEditPage({ driver, buses, onBack, onSave, onPay }) {
-  const initialHistory = useMemo(() => driver?.paymentHistory || [], [driver]);
+function DriverEditPage({ driver, buses, onBack, onSave }) {
   const isNewDriver = !driver;
 
   const [formState, setFormState] = useState(() => ({
@@ -12,8 +11,6 @@ function DriverEditPage({ driver, buses, onBack, onSave, onPay }) {
     password: driver?.password || '',
     assignedBusNo: driver?.assignedBusNo || '',
     totalDrivingHours: driver?.totalDrivingHours || '',
-    payableAmount: driver?.payableAmount ?? 0,
-    paymentHistory: initialHistory,
     driverId: driver?.driverId || '',
   }));
 
@@ -26,8 +23,6 @@ function DriverEditPage({ driver, buses, onBack, onSave, onPay }) {
       password: driver?.password || '',
       assignedBusNo: driver?.assignedBusNo || '',
       totalDrivingHours: driver?.totalDrivingHours || '',
-      payableAmount: driver?.payableAmount ?? 0,
-      paymentHistory: driver?.paymentHistory || [],
       driverId: driver?.driverId || '',
     });
   }, [driver]);
@@ -36,7 +31,7 @@ function DriverEditPage({ driver, buses, onBack, onSave, onPay }) {
     const { name, value } = event.target;
     setFormState((currentState) => ({
       ...currentState,
-      [name]: name === 'payableAmount' ? Number(value) : value,
+      [name]: value,
     }));
   };
 
@@ -51,21 +46,8 @@ function DriverEditPage({ driver, buses, onBack, onSave, onPay }) {
       password: formState.password,
       assignedBusNo: formState.assignedBusNo,
       totalDrivingHours: formState.totalDrivingHours,
-      payableAmount: formState.payableAmount,
-      paymentHistory: formState.paymentHistory,
-      status: formState.payableAmount > 0 ? 'Due' : 'Paid',
       driverId: formState.driverId,
     });
-  };
-
-  const canPay = formState.payableAmount > 0;
-
-  const handlePay = () => {
-    if (!canPay) {
-      return;
-    }
-
-    onPay(formState.driverId, formState.payableAmount);
   };
 
   return (
@@ -121,18 +103,7 @@ function DriverEditPage({ driver, buses, onBack, onSave, onPay }) {
             </>
           )}
 
-          {!isNewDriver && (
-            <label>
-              Total Payable
-              <input
-                name="payableAmount"
-                type="number"
-                min="0"
-                value={formState.payableAmount}
-                onChange={handleChange}
-              />
-            </label>
-          )}
+
         </div>
       </div>
 
@@ -149,51 +120,14 @@ function DriverEditPage({ driver, buses, onBack, onSave, onPay }) {
 
       {!isNewDriver && (
         <div className="driver-payment-card panel">
-        <div className="payment-header">
-          <h2>Payment Details</h2>
-        </div>
-
-        <div className="payment-panel-grid">
-          <div className="payment-current-box">
-            <div className="payment-current-title">Current Payable Amount</div>
-            <div className="payment-current-amount">Rs.{Number(formState.payableAmount).toLocaleString()}/=</div>
-            <button
-              type="button"
-              className="pay-button"
-              onClick={handlePay}
-              disabled={!canPay}
-            >
-              Pay
+          <div className="edit-actions driver-actions">
+            <button type="button" className="back-button" onClick={onBack}>
+              Back
+            </button>
+            <button type="button" className="action-button save-button" onClick={handleSave}>
+              Save Details
             </button>
           </div>
-
-          <div className="payment-history-box">
-            <h3>Payment History</h3>
-            <div className="payment-history-table" role="table" aria-label="Driver payment history">
-              <div className="payment-history-head" role="row">
-                <span role="columnheader">Payment Date</span>
-                <span role="columnheader">Payment Amount</span>
-              </div>
-              <div className="payment-history-body">
-                {formState.paymentHistory.map((entry) => (
-                  <div className="payment-history-row" role="row" key={`${entry.date}-${entry.amount}`}>
-                    <span role="cell">{entry.date}</span>
-                    <span role="cell">{entry.amount}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="edit-actions driver-actions">
-          <button type="button" className="back-button" onClick={onBack}>
-            Back
-          </button>
-          <button type="button" className="action-button save-button" onClick={handleSave}>
-            {isNewDriver ? 'Create Driver' : 'Save Details'}
-          </button>
-        </div>
         </div>
       )}
 

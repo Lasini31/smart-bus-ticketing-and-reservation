@@ -214,11 +214,13 @@
 }
 
 .drivers-head {
-  grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.55fr) minmax(0, 0.78fr) 56px;
+  grid-template-columns: 1fr 56px;
 }
 
 .drivers-body .driver-row {
-  grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.55fr) minmax(0, 0.78fr) 56px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .driver-id-head,

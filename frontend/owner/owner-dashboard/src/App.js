@@ -41,49 +41,31 @@ const buses = [
 
 const drivers = [
   {
-    name: 'Theekshana Kaushallya',
+    name: 'Theekshana D',
     contactNo: '+94 75 755 6545',
+    email: 'tk@gmail.com',
     driverId: 'SRK15',
     licenceNo: '19568465213V',
     assignedBusNo: 'NA - 1334',
-    status: 'Due',
     totalDrivingHours: '156hr',
-    payableAmount: 500000,
-    paymentHistory: [
-      { date: 'March', amount: 'Rs.250 000/=' },
-      { date: 'February', amount: 'Rs.250 000/=' },
-      { date: 'January', amount: 'Rs.250 000/=' },
-    ],
   },
   {
     name: 'Sandil R',
     contactNo: '+94 77 111 2233',
+    email: 'sr@gmail.com',
     driverId: 'SRK17',
     licenceNo: '17568465211V',
     assignedBusNo: 'NG - 4565',
-    status: 'Paid',
     totalDrivingHours: '122hr',
-    payableAmount: 0,
-    paymentHistory: [
-      { date: 'March', amount: 'Rs.250 000/=' },
-      { date: 'February', amount: 'Rs.250 000/=' },
-      { date: 'January', amount: 'Rs.250 000/=' },
-    ],
   },
   {
     name: 'Sandul R',
     contactNo: '+94 76 888 5544',
+    email: 'sd@gmail.com',
     driverId: 'SRK20',
     licenceNo: '20568465210V',
     assignedBusNo: 'NK - 5656',
-    status: 'Paid',
     totalDrivingHours: '138hr',
-    payableAmount: 0,
-    paymentHistory: [
-      { date: 'March', amount: 'Rs.250 000/=' },
-      { date: 'February', amount: 'Rs.250 000/=' },
-      { date: 'January', amount: 'Rs.250 000/=' },
-    ],
   },
 ];
 
@@ -119,7 +101,7 @@ function App() {
     setSelectedBusNo('');
     setView('add-bus');
   };
-
+ 
   const handleEditDriver = (driverId) => {
     setSelectedDriverId(driverId);
     setView('driver-edit');
@@ -167,14 +149,7 @@ function App() {
       const existingDriver = currentDrivers.find((driver) => driver.driverId === selectedDriverId);
       const nextDrivers = currentDrivers.some((driver) => driver.driverId === selectedDriverId)
         ? currentDrivers.map((driver) => (driver.driverId === selectedDriverId ? updatedDriver : driver))
-        : [
-            ...currentDrivers,
-            {
-              ...updatedDriver,
-              paymentHistory: updatedDriver.paymentHistory || [],
-              status: updatedDriver.payableAmount > 0 ? 'Due' : 'Paid',
-            },
-          ];
+        : [...currentDrivers, updatedDriver];
 
       setBusList((currentBuses) =>
         currentBuses.map((bus) => {
@@ -213,28 +188,6 @@ function App() {
     setView('dashboard');
   };
 
-  const handlePayDriver = (driverId, paymentAmount) => {
-    setDriverList((currentDrivers) =>
-      currentDrivers.map((driver) => {
-        if (driver.driverId !== driverId) {
-          return driver;
-        }
-
-        const nextHistory = [
-          { date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' }), amount: `Rs.${paymentAmount.toLocaleString()}/=` },
-          ...driver.paymentHistory,
-        ];
-
-        return {
-          ...driver,
-          payableAmount: 0,
-          status: 'Paid',
-          paymentHistory: nextHistory,
-        };
-      }),
-    );
-  };
-
   const handleBackToDashboard = () => {
     setView('dashboard');
   };
@@ -270,7 +223,6 @@ function App() {
             buses={busList}
             onBack={handleBackToDashboard}
             onSave={handleSaveDriver}
-            onPay={handlePayDriver}
           />
         </main>
       ) : view === 'driver-edit' ? (
@@ -280,7 +232,6 @@ function App() {
             buses={busList}
             onBack={handleBackToDashboard}
             onSave={handleSaveDriver}
-            onPay={handlePayDriver}
           />
         </main>
       ) : (
