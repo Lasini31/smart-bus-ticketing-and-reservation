@@ -8,9 +8,14 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
+import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Configuration
 public class SecurityConfig {
+
+    @Value("${app.auth.mock:false}")
 
     @Value("${app.auth.mock:false}")
     private boolean mock;
@@ -19,7 +24,10 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http.csrf(csrf -> csrf.disable());
+        http.csrf(csrf -> csrf.disable());
 
+        if (mock) {
+            http.authorizeHttpRequests(auth -> auth
         if (mock) {
             http.authorizeHttpRequests(auth -> auth
                     .anyRequest().permitAll()
@@ -28,6 +36,10 @@ public class SecurityConfig {
             http
                     .authorizeHttpRequests(auth -> auth
                             .requestMatchers("/auth/**").permitAll()
+                            .requestMatchers("/users/**").permitAll()
+                            .requestMatchers("/routes/**").permitAll()
+                            .requestMatchers("/trips/**").permitAll()
+                            .requestMatchers("/bookings/**").permitAll()
                             .anyRequest().authenticated()
                     )
                     .oauth2ResourceServer(oauth -> oauth

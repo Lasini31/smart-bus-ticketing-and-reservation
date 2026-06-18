@@ -33,9 +33,11 @@ public class SupabaseAuthService implements AuthService{
     public AuthResponse login(LoginRequest request) {
 
         String url = SUPABASE_URL + "/auth/v1/token?grant_type=password";
+        String url = SUPABASE_URL + "/auth/v1/token?grant_type=password";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("apikey", API_KEY);
         headers.set("apikey", API_KEY);
 
         Map<String, String> body = Map.of(
@@ -80,14 +82,17 @@ public class SupabaseAuthService implements AuthService{
     public AuthResponse register(RegisterRequest request) {
 
     String url = SUPABASE_URL + "/auth/v1/signup";
+    String url = SUPABASE_URL + "/auth/v1/signup";
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
+    headers.set("apikey", API_KEY);
     headers.set("apikey", API_KEY);
 
     Map<String, Object> body = Map.of(
             "email", request.getEmail(),
             "password", request.getPassword(),
+            "data", Map.of("role", request.getRole()) 
             "data", Map.of("role", request.getRole()) 
     );
 
@@ -119,6 +124,7 @@ public class SupabaseAuthService implements AuthService{
     return AuthResponse.builder()
             .token(token)
             .role(request.getRole())
+            .role(request.getRole())
             .userId(userId)
             .build();
     }
@@ -126,10 +132,11 @@ public class SupabaseAuthService implements AuthService{
     public void forgotPassword(ForgotPasswordRequest request) {
 
     String url = SUPABASE_URL + "/auth/v1/recover";
+    String url = SUPABASE_URL + "/auth/v1/recover";
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.set("apikey", API_KEY                );
+    headers.set("apikey", apiKey                );
 
     Map<String, String> body = Map.of(
             "email", request.getEmail()
@@ -143,9 +150,11 @@ public class SupabaseAuthService implements AuthService{
     public AuthResponse loginWithGoogle(GoogleLoginRequest request) {
 
     String url = SUPABASE_URL + "/auth/v1/token?grant_type=id_token";
+    String url = SUPABASE_URL + "/auth/v1/token?grant_type=id_token";
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
+    headers.set("apikey", API_KEY);
     headers.set("apikey", API_KEY);
 
     Map<String, String> body = Map.of(
@@ -171,6 +180,9 @@ public class SupabaseAuthService implements AuthService{
     String role = (metadata != null && metadata.get("role") != null)
             ? metadata.get("role").toString()
             : "passenger";
+    String role = (metadata != null && metadata.get("role") != null)
+            ? metadata.get("role").toString()
+            : "passenger";
 
     return AuthResponse.builder()
             .token(token)
@@ -182,8 +194,10 @@ public class SupabaseAuthService implements AuthService{
     public void logout(String token) {
 
     String url = SUPABASE_URL + "/auth/v1/logout";
+    String url = SUPABASE_URL + "/auth/v1/logout";
 
     HttpHeaders headers = new HttpHeaders();
+    headers.set("apikey", API_KEY);
     headers.set("apikey", API_KEY);
     headers.set("Authorization", "Bearer " + token);
 
