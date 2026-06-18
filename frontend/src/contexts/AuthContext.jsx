@@ -154,6 +154,17 @@ export function AuthProvider({ children }) {
       }
       
       const result = await response.json()
+      
+      // Automatically log in the user after successful registration
+      const payload = {
+        name: name,
+        token: result.token,
+        userId: result.userId,
+        role: result.role || role,
+        email: email
+      }
+      
+      setUser(payload)
       return result
       
     } catch (err) {

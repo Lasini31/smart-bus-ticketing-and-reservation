@@ -19,25 +19,23 @@ import com.STAR.busmanagement.auth.dto.LoginRequest;
 import com.STAR.busmanagement.auth.dto.RegisterRequest;
 
 @Service
-public class SupabaseAuthService implements AuthService{
+public class SupabaseAuthService implements AuthService {
 
     private final String SUPABASE_URL = "https://rpbufjokybeukqcdfumq.supabase.co";
     private final String API_KEY = "sb_publishable_zWjaFipP-Rn95FQ44BRKbg_9WqwSPpi";
-
-
-
-    
-
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public AuthResponse login(LoginRequest request) {
-
-        String url = SUPABASE_URL + "/auth/v1/token?grant_type=password";
-
+    // Helper method to eliminate header duplication
+    private HttpHeaders createBaseHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("apikey", API_KEY);
-        headers.set("apikey", API_KEY);
+        return headers;
+    }
+
+    public AuthResponse login(LoginRequest request) {
+        String url = SUPABASE_URL + "/auth/v1/token?grant_type=password";
+        HttpHeaders headers = createBaseHeaders();
 
         Map<String, String> body = Map.of(
                 "email", request.getUsername(),
@@ -51,14 +49,10 @@ public class SupabaseAuthService implements AuthService{
                     restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
 
             Map<String, Object> resp = response.getBody();
-
             String token = (String) resp.get("access_token");
 
-            // Extract user info
             Map<String, Object> user = (Map<String, Object>) resp.get("user");
-
             String userId = (String) user.get("id");
-
             Map<String, Object> metadata = (Map<String, Object>) user.get("app_metadata");
 
             String role = (metadata != null && metadata.get("role") != null)
@@ -79,130 +73,97 @@ public class SupabaseAuthService implements AuthService{
     }
 
     public AuthResponse register(RegisterRequest request) {
+        String url = SUPABASE_URL + "/auth/v1/signup";
+        HttpHeaders headers = createBaseHeaders();
 
-    String url = SUPABASE_URL + "/auth/v1/signup";
+        Map<String, Object> body = Map.of(
+                "email", request.getEmail(),
+                "password", request.getPassword(),
+                "data", Map.of(
+                        "role", request.getRole()
+                        //"name", request.getName() != null ? request.getName() : "",
+                        //"contact_no", request.getContact_no() != null ? request.getContact_no() : ""
+                )
+        );
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.set("apikey", API_KEY);
-    headers.set("apikey", API_KEY);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
-    Map<String, Object> body = Map.of(
-            "email", request.getEmail(),
-            "password", request.getPassword(),
-            "data", Map.of(
-                    "role", request.getRole(),
-                    "name", request.getName() != null ? request.getName() : "",
-                    "contact_no", request.getContact_no() != null ? request.getContact_no() : ""
-            )
-    );
+        ResponseEntity<Map> response =
+                restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
 
-    HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+        Map<String, Object> resp = response.getBody();
+        String token = (String) resp.get("access_token");
+        Map<String, Object> user = (Map<String, Object>) resp.get("user");
 
-    ResponseEntity<Map> response =
-            restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
+        if (user == null || token == null) {
+            return AuthResponse.builder()
+                    .token(null)
+                    .role(request.getRole())
+                    .userId(null)
+                    .build();
+        }
 
-    Map<String, Object> resp = response.getBody();
+        String userId = (String) user.get("id");
 
-    String token = (String) resp.get("access_token");
-
-    Map<String, Object> user = (Map<String, Object>) resp.get("user");
-
-    // When email confirmation is enabled, Supabase returns no token or user object.
-    // Registration still succeeded — the Supabase trigger will set the role in
-    // app_metadata when the user clicks the confirmation link.
-    if (user == null || token == null) {
         return AuthResponse.builder()
-                .token(null)
-                .role(request.getRole())
-                .userId(null)
+                .token(token)
+                .role(request.getRole()) // Duplication safely removed here
+                .userId(userId)
                 .build();
     }
 
-    // Email confirmation disabled — user is immediately active
-    String userId = (String) user.get("id");
-
-    return AuthResponse.builder()
-            .token(token)
-            .role(request.getRole())
-            .role(request.getRole())
-            .userId(userId)
-            .build();
-    }
-
     public void forgotPassword(ForgotPasswordRequest request) {
+        String url = SUPABASE_URL + "/auth/v1/recover";
+        HttpHeaders headers = createBaseHeaders();
 
-    String url = SUPABASE_URL + "/auth/v1/recover";
+        Map<String, String> body = Map.of(
+                "email", request.getEmail()
+        );
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.set("apikey", API_KEY);
-
-    Map<String, String> body = Map.of(
-            "email", request.getEmail()
-    );
-
-    HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
-
-    restTemplate.exchange(url, HttpMethod.POST, entity, Void.class);
+        HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
+        restTemplate.exchange(url, HttpMethod.POST, entity, Void.class);
     }
 
     public AuthResponse loginWithGoogle(GoogleLoginRequest request) {
+        String url = SUPABASE_URL + "/auth/v1/token?grant_type=id_token";
+        HttpHeaders headers = createBaseHeaders();
 
-    String url = SUPABASE_URL + "/auth/v1/token?grant_type=id_token";
+        Map<String, String> body = Map.of(
+                "provider", "google",
+                "id_token", request.getIdToken()
+        );
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.set("apikey", API_KEY);
-    headers.set("apikey", API_KEY);
+        HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
 
-    Map<String, String> body = Map.of(
-            "provider", "google",
-            "id_token", request.getIdToken()
-    );
+        ResponseEntity<Map> response =
+                restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
 
-    HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
+        Map<String, Object> resp = response.getBody();
+        String token = (String) resp.get("access_token");
 
-    ResponseEntity<Map> response =
-            restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
+        Map<String, Object> user = (Map<String, Object>) resp.get("user");
+        String userId = (String) user.get("id");
+        Map<String, Object> metadata = (Map<String, Object>) user.get("app_metadata");
 
-    Map<String, Object> resp = response.getBody();
+        String role = (metadata != null && metadata.get("role") != null)
+                ? metadata.get("role").toString()
+                : "passenger";
 
-    String token = (String) resp.get("access_token");
-
-    Map<String, Object> user = (Map<String, Object>) resp.get("user");
-
-    String userId = (String) user.get("id");
-
-    Map<String, Object> metadata = (Map<String, Object>) user.get("app_metadata");
-
-    String role = (metadata != null && metadata.get("role") != null)
-            ? metadata.get("role").toString()
-            : "passenger";
-
-    return AuthResponse.builder()
-            .token(token)
-            .role(role)
-            .userId(userId)
-            .build();
-    } 
-    
-    public void logout(String token) {
-
-    String url = SUPABASE_URL + "/auth/v1/logout";
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.set("apikey", API_KEY);
-    headers.set("apikey", API_KEY);
-    headers.set("Authorization", "Bearer " + token);
-
-    HttpEntity<Void> entity = new HttpEntity<>(headers);
-
-    restTemplate.exchange(url, HttpMethod.POST, entity, Void.class);
+        return AuthResponse.builder()
+                .token(token)
+                .role(role)
+                .userId(userId)
+                .build();
     }
 
+    public void logout(String token) {
+        String url = SUPABASE_URL + "/auth/v1/logout";
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("apikey", API_KEY);
+        headers.set("Authorization", "Bearer " + token);
 
-
-
-
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+        restTemplate.exchange(url, HttpMethod.POST, entity, Void.class);
+    }
 }

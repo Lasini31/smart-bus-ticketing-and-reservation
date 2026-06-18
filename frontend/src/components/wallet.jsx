@@ -140,8 +140,8 @@ export default function Wallet() {
     return (
       <div className="min-h-screen pt-24 pb-12 px-4 flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent"></div>
+          <p className="mt-4 text-slate-600">Loading...</p>
         </div>
       </div>
     )
@@ -157,8 +157,8 @@ export default function Wallet() {
     return (
       <div className="min-h-screen pt-24 pb-12 px-4 flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"></div>
-          <p className="mt-4 text-gray-600">Loading wallet data...</p>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent"></div>
+          <p className="mt-4 text-slate-600">Loading wallet data...</p>
         </div>
       </div>
     )
@@ -373,7 +373,7 @@ export default function Wallet() {
                       setSelectedAmount(amount)
                       setCustomTopUp('')
                     }}
-                    className={`rounded-xl border p-3 text-left transition-all ${selectedAmount === amount ? 'border-green-600 bg-green-600 text-white shadow-md shadow-green-600/10' : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'}`}
+                    className={`rounded-xl border p-3 text-left transition-all ${selectedAmount === amount && !customTopUp ? 'border-slate-900 bg-slate-900 text-white shadow-md shadow-slate-900/10' : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'}`}
                     disabled={isProcessing}
                   >
                     <p className="text-sm font-bold">Rs. {amount}</p>
@@ -401,7 +401,7 @@ export default function Wallet() {
                       }
                     }}
                     placeholder="Enter Custom Value"
-                    className="w-full bg-transparent px-3 py-2.5 text-sm text-gray-800 outline-none"
+                    className="w-full bg-transparent px-3 py-2.5 text-sm text-slate-800 outline-none"
                     disabled={isProcessing}
                   />
                 </div>
@@ -411,7 +411,7 @@ export default function Wallet() {
                 type="button"
                 onClick={handleTopUp}
                 disabled={isProcessing}
-                className="mt-5 w-full rounded-xl bg-green-600 hover:bg-green-700 px-4 py-3 text-sm font-semibold text-white transition shadow-sm shadow-green-600/10 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="mt-5 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-3 text-sm font-semibold text-white transition shadow-sm shadow-emerald-600/10 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span>Authorize Top-Up · Rs. {customTopUp || selectedAmount}</span>
               </button>
@@ -442,7 +442,7 @@ export default function Wallet() {
                         }
                       }}
                       placeholder="e.g. 1000"
-                      className="w-full bg-transparent px-3 py-2.5 text-sm text-gray-800 outline-none"
+                      className="w-full bg-transparent px-3 py-2.5 text-sm text-slate-800 outline-none"
                       disabled={isProcessing}
                     />
                   </div>
@@ -455,7 +455,7 @@ export default function Wallet() {
                     value={refundReason}
                     onChange={event => setRefundReason(event.target.value)}
                     placeholder="e.g. Booking Cancellation"
-                    className="mt-2 w-full rounded-lg border border-gray-200 shadow-2xs px-3 py-2.5 text-sm text-gray-800 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition-all bg-white"
+                    className="mt-2 w-full rounded-lg border border-slate-200 shadow-2xs px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all bg-white"
                     disabled={isProcessing}
                   />
                 </div>
@@ -464,7 +464,7 @@ export default function Wallet() {
                   type="button"
                   onClick={handleRefund}
                   disabled={isProcessing}
-                  className="w-full rounded-xl bg-green-600 hover:bg-green-700 px-4 py-3 text-sm font-semibold text-white transition shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full rounded-xl bg-slate-900 hover:bg-slate-800 px-4 py-3 text-sm font-semibold text-white transition shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                   <span>Credit Verified Refund</span>
@@ -510,7 +510,7 @@ export default function Wallet() {
                 onChange={(e) => setCancelReason(e.target.value)}
                 placeholder="Type cancellation reason..."
                 rows={4}
-                className="w-full rounded-xl border border-gray-200 p-3 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/10"
+                className="w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/10"
                 disabled={isProcessing}
               />
             </div>
@@ -522,7 +522,7 @@ export default function Wallet() {
                   setCancelReason('')
                   setSelectedTransaction(null)
                 }}
-                className="px-4 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
+                className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"
                 disabled={isProcessing}
               >
                 Close
