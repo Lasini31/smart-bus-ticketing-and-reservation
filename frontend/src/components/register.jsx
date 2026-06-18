@@ -1,15 +1,21 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; 
 
 export default function Register() {
   // --- STATE VARIABLES ---
   const [role, setRole] = useState(''); 
-  const [username, setUsername] = useState('');
+  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [passwordScore, setPasswordScore] = useState(0);
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const navigate = useNavigate(); // Initialize the navigation tool
 
@@ -25,6 +31,41 @@ export default function Register() {
     alert(`Ready to connect to Google Auth as a: ${role}`);
   };
 
+  useEffect(() => {
+    setPasswordScore(calculatePasswordScore(password));
+  }, [password]);
+
+  function calculatePasswordScore(pw) {
+    let score = 0;
+    if (!pw) return 0;
+    if (pw.length >= 8) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    return score; // 0..4
+  }
+
+  function validateEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  function validatePhone(phone) {
+    // Basic international phone validation
+    return /^\+?[0-9]{7,15}$/.test(phone.replace(/\s+/g, ''));
+  }
+
+  function validateFields() {
+    const errors = {};
+    if (!name.trim()) errors.name = 'Full name is required';
+    if (!validatePhone(phone)) errors.phone = 'Enter a valid phone number (digits only, include country code)';
+    if (!validateEmail(email)) errors.email = 'Enter a valid email address';
+    if (password.length < 8) errors.password = 'Password must be at least 8 characters';
+    if (password !== confirmPassword) errors.confirmPassword = 'Passwords do not match';
+    if (!termsAccepted) errors.terms = 'You must accept the terms and privacy policy';
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  }
+
   // --- SUBMIT FUNCTION FOR MANUAL SIGN UP ---
   const handleSubmit = async (event) => {
     event.preventDefault(); 
@@ -35,23 +76,21 @@ export default function Register() {
       return;
     }
 
-    if (password !== confirmPassword) {
-      setErrorMessage("Passwords do not match!");
-      return; 
+    if (!validateFields()) {
+      setErrorMessage('Please fix highlighted errors before continuing');
+      return;
     }
 
     // --- PREPARE DATA FOR BACKEND ---
-    const userData = {
-      role: role, 
+const userData = {
+  email: email,
+  password: password,
+  role: role
+};
 
-      username: username,
-      password: password,
-      phone: phone,
-      email: email
-    };
-
+    setLoading(true);
     try {
-      const response = await fetch('http://localhost:8081/api/register', {
+      const response = await fetch('http://localhost:8081/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -60,10 +99,17 @@ export default function Register() {
       });
 
       const data = await response.json();
-      
+
       if (response.ok) {
-        // Teleport the user to the login page on success!
-        navigate('/login'); 
+        // clear sensitive fields
+        setPassword('');
+        setConfirmPassword('');
+        // If owner, redirect to bus setup
+        if (role === 'owner') {
+          navigate('/owner/bus-setup');  
+        } else {
+          navigate('/'); //////////////////////////////////////////////////////////
+        }
       } else {
         setErrorMessage(data.message || "Registration failed. Please try again.");
       }
@@ -71,13 +117,36 @@ export default function Register() {
     } catch (error) {
       console.log("Failed to connect to backend", error);
       setErrorMessage("Server error. Please make sure the backend is running.");
+    } finally {
+      setLoading(false);
     }
   };
 
+  // If role not selected yet, show role selection screen
+  if (!role) {
+    return (
+      <div className="flex min-h-screen bg-white">
+        <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8">
+          <div className="w-full max-w-md text-center">
+            <h1 className="text-4xl font-bold mb-6">Who are you?</h1>
+            <p className="mb-6 text-sm text-gray-600">Select your account type to continue.</p>
+            <div className="space-y-3">
+              <button onClick={() => setRole('passenger')} className="w-full rounded-full border border-emerald-600 px-5 py-3 text-sm font-semibold text-emerald-700 hover:bg-emerald-50">I'm a passenger</button>
+              <button onClick={() => setRole('owner')} className="w-full rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700">I'm a bus owner</button>
+            </div>
+            <p className="mt-6 text-xs text-gray-500">You can register as a driver later from your profile.</p>
+          </div>
+        </div>
+        <div className="hidden md:flex w-1/2 justify-center items-center p-12">
+          <img src="/bus.png" alt="bus" className="w-full max-w-lg object-contain" />
+        </div>
+      </div>
+    )
+  }
+
+  // Passenger registration form
   return (
     <div className="flex min-h-screen bg-white">
-      
-      {/* Left Side: Bus Image */}
       <div className="hidden md:flex w-1/2 justify-center items-center p-12">
         <img 
           src="/bus.png" 
@@ -86,81 +155,26 @@ export default function Register() {
         />
       </div>
 
-      {/* Right Side: Register Form */}
       <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8">
         <div className="w-full max-w-md">
-          <h1 className="text-4xl font-bold text-center mb-8">Create an account</h1>
+          <h1 className="text-4xl font-bold text-center mb-8">{role === 'owner' ? 'Owner Signup' : 'Passenger Signup'}</h1>
+          {role === 'owner' && (
+            <p className="text-sm text-gray-600 text-center mb-4">You'll be able to add buses and assign staff after completing this signup.</p>
+          )}
 
-          {/* Compulsory Role Selection Dropdown */}
-          <div className="mb-6">
-            <select 
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              required
-              className="block w-full px-3 py-2 border border-green-400 rounded focus:outline-none focus:ring-1 focus:ring-green-500 bg-white text-gray-700"
-            >
-              <option value="" disabled>Select your role...</option>
-              <option value="passenger">Passenger</option>
-              <option value="driver">Driver</option>
-              <option value="owner">Owner</option>
-            </select>
-          </div>
-
-          {/* Option 1 - Google Sign Up */}
-          <button 
-            type="button" 
-            onClick={handleGoogleSignUp}
-            className="w-full flex items-center justify-center space-x-3 py-2 px-4 border border-gray-300 rounded hover:bg-gray-50 transition-colors font-medium text-gray-700"
-          >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-            </svg>
-            <span>Sign up with Google</span>
-          </button>
-
-          {/* OR Divider */}
-          <div className="flex items-center my-6">
-            <div className="flex-grow border-t border-green-200"></div>
-            <span className="px-3 text-gray-400 text-xs font-bold tracking-wider">OR FILL MANUALLY</span>
-            <div className="flex-grow border-t border-green-200"></div>
-          </div>
-
-          {/* Option 2 - Manual Sign Up Form */}
-          <form className="space-y-4" onSubmit={handleSubmit}>
+          <form className="space-y-4" onSubmit={handleSubmit} noValidate>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Full name</label>
               <input 
                 type="text" 
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 required
-                className="block w-full px-3 py-2 border border-green-400 rounded focus:outline-none focus:ring-1 focus:ring-green-500" 
+                aria-invalid={!!fieldErrors.name}
+                aria-describedby={fieldErrors.name ? 'error-name' : undefined}
+                className={`block w-full px-3 py-2 border rounded focus:outline-none focus:ring-1 ${fieldErrors.name ? 'border-red-400 focus:ring-red-500' : 'border-green-400 focus:ring-green-500'}`} 
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-              <input 
-                type="password" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="block w-full px-3 py-2 border border-green-400 rounded focus:outline-none focus:ring-1 focus:ring-green-500" 
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Confirm password</label>
-              <input 
-                type="password" 
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className="block w-full px-3 py-2 border border-green-400 rounded focus:outline-none focus:ring-1 focus:ring-green-500" 
-              />
+              {fieldErrors.name && <div id="error-name" className="text-sm text-red-600 mt-1">{fieldErrors.name}</div>}
             </div>
 
             <div>
@@ -170,8 +184,12 @@ export default function Register() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 required
-                className="block w-full px-3 py-2 border border-green-400 rounded focus:outline-none focus:ring-1 focus:ring-green-500" 
+                aria-invalid={!!fieldErrors.phone}
+                aria-describedby={fieldErrors.phone ? 'error-phone' : undefined}
+                placeholder="+947XXXXXXXX or +1XXXXXXXXXX"
+                className={`block w-full px-3 py-2 border rounded focus:outline-none focus:ring-1 ${fieldErrors.phone ? 'border-red-400 focus:ring-red-500' : 'border-green-400 focus:ring-green-500'}`} 
               />
+              {fieldErrors.phone && <div id="error-phone" className="text-sm text-red-600 mt-1">{fieldErrors.phone}</div>}
             </div>
 
             <div>
@@ -181,11 +199,62 @@ export default function Register() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="block w-full px-3 py-2 border border-green-400 rounded focus:outline-none focus:ring-1 focus:ring-green-500" 
+                aria-invalid={!!fieldErrors.email}
+                aria-describedby={fieldErrors.email ? 'error-email' : undefined}
+                autoComplete="email"
+                className={`block w-full px-3 py-2 border rounded focus:outline-none focus:ring-1 ${fieldErrors.email ? 'border-red-400 focus:ring-red-500' : 'border-green-400 focus:ring-green-500'}`} 
               />
+              {fieldErrors.email && <div id="error-email" className="text-sm text-red-600 mt-1">{fieldErrors.email}</div>}
             </div>
 
-            {/* Error Message Display */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <div className="relative">
+                <input 
+                  type={showPassword ? 'text' : 'password'} 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  aria-invalid={!!fieldErrors.password}
+                  aria-describedby={fieldErrors.password ? 'error-password' : 'pw-help'}
+                  autoComplete="new-password"
+                  className={`block w-full px-3 py-2 border rounded focus:outline-none focus:ring-1 ${fieldErrors.password ? 'border-red-400 focus:ring-red-500' : 'border-green-400 focus:ring-green-500'}`} 
+                />
+                <button type="button" onClick={() => setShowPassword(s => !s)} className="absolute right-2 top-2 text-sm text-gray-600">{showPassword ? 'Hide' : 'Show'}</button>
+              </div>
+              <div id="pw-help" className="mt-2">
+                <div className="h-2 w-full bg-gray-200 rounded overflow-hidden">
+                  <div style={{ width: `${(passwordScore / 4) * 100}%` }} className={`h-full ${passwordScore >= 3 ? 'bg-emerald-500' : passwordScore === 2 ? 'bg-yellow-400' : 'bg-red-400'}`}></div>
+                </div>
+                <div className="text-xs text-gray-500 mt-1">Use at least 8 characters, mix upper/lowercase letters, numbers and symbols.</div>
+                {fieldErrors.password && <div id="error-password" className="text-sm text-red-600 mt-1">{fieldErrors.password}</div>}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Confirm password</label>
+              <div className="relative">
+                <input 
+                  type={showConfirm ? 'text' : 'password'} 
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  aria-invalid={!!fieldErrors.confirmPassword}
+                  aria-describedby={fieldErrors.confirmPassword ? 'error-confirm' : undefined}
+                  autoComplete="new-password"
+                  className={`block w-full px-3 py-2 border rounded focus:outline-none focus:ring-1 ${fieldErrors.confirmPassword ? 'border-red-400 focus:ring-red-500' : 'border-green-400 focus:ring-green-500'}`} 
+                />
+                <button type="button" onClick={() => setShowConfirm(s => !s)} className="absolute right-2 top-2 text-sm text-gray-600">{showConfirm ? 'Hide' : 'Show'}</button>
+              </div>
+              {fieldErrors.confirmPassword && <div id="error-confirm" className="text-sm text-red-600 mt-1">{fieldErrors.confirmPassword}</div>}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input id="terms" type="checkbox" checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} />
+              <label htmlFor="terms" className="text-sm text-gray-600">I agree to the <a href="/terms" className="text-green-600 hover:underline">terms</a> and <a href="/privacy" className="text-green-600 hover:underline">privacy policy</a>.</label>
+            </div>
+            {fieldErrors.terms && <div className="text-sm text-red-600">{fieldErrors.terms}</div>}
+
             {errorMessage && (
               <div className="text-red-500 text-sm font-medium mt-2">
                 {errorMessage}
@@ -193,21 +262,18 @@ export default function Register() {
             )}
 
             <div className="mt-6">
-              <button type="submit" className="w-full py-2 px-6 border border-gray-800 rounded font-semibold text-gray-800 hover:bg-gray-50 transition-colors">
-                Sign Up
+              <button type="submit" disabled={loading} className={`w-full py-2 px-6 rounded font-semibold text-white transition-colors ${loading ? 'bg-gray-400' : 'bg-emerald-600 hover:bg-emerald-700'}`}>
+                {loading ? 'Signing up…' : 'Sign Up'}
               </button>
             </div>
           </form>
 
-          {/* Bottom Link */}
           <div className="text-center mt-6">
             <p className="text-xs text-gray-600 font-medium">Already have an account?</p>
             <a href="/login" className="text-xs text-green-500 hover:underline">Login</a>
           </div>
-          
         </div>
       </div>
-
     </div>
   );
 }

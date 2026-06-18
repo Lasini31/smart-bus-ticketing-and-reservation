@@ -1,0 +1,30 @@
+server:
+  port: 8081
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://rpbufjokybeukqcdfumq.supabase.co/auth/v1/keys
+  datasource:
+    url: jdbc:postgresql://db.rpbufjokybeukqcdfumq.supabase.co:5432/postgres
+    username: postgres
+    password: 9KMUZZV2cZ8J0HDS
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+supabase:
+  url: https://rpbufjokybeukqcdfumq.supabase.co
+  key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwYnVmam9reWJldWtxY2RmdW1xIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjA0NTYxOSwiZXhwIjoyMDkxNjIxNjE5fQ.bpg9LvWMmo2VFCgsF1GN4sSOexaQgN_THhQ1qULwi_o
+
+env:
+  SUPERBASE_URL: https://rpbufjokybeukqcdfumq.supabase.co
+  SUPERBASE_API_KEY: sb_publishable_zWjaFipP-Rn95FQ44BRKbg_9WqwSPpi
+  SUPERBASE_SERVICE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwYnVmam9reWJldWtxY2RmdW1xIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjA0NTYxOSwiZXhwIjoyMDkxNjIxNjE5fQ.bpg9LvWMmo2VFCgsF1GN4sSOexaQgN_THhQ1qULwi_o
+
+app:
+  auth:
+    mock: false
