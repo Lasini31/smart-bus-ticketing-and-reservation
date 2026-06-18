@@ -16,18 +16,13 @@ import jakarta.servlet.http.HttpServletRequest;
 public class SecurityConfig {
 
     @Value("${app.auth.mock:false}")
-
-    @Value("${app.auth.mock:false}")
     private boolean mock;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http.csrf(csrf -> csrf.disable());
-        http.csrf(csrf -> csrf.disable());
-
-        if (mock) {
-            http.authorizeHttpRequests(auth -> auth
+        
         if (mock) {
             http.authorizeHttpRequests(auth -> auth
                     .anyRequest().permitAll()
