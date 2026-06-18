@@ -4,6 +4,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpEntity;
@@ -12,6 +14,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import com.STAR.busmanagement.owner.dto.AddBusRequest;
@@ -24,6 +27,8 @@ import com.STAR.busmanagement.owner.dto.OwnerAnalyticsResponse;
 @Primary
 @Service
 public class SupabaseOwnerService implements OwnerService {
+
+    private static final Logger log = LoggerFactory.getLogger(SupabaseOwnerService.class);
 
     @Value("${env.VITE_SUPABASE_URL}")
     private String supabaseUrl;
@@ -84,40 +89,44 @@ public class SupabaseOwnerService implements OwnerService {
     }
 
     // ADD DRIVER
-    @Override
-    public DriverResponse addDriver(AddDriverRequest request, String employerId) {
-        requireField(employerId, "employerId is required");
-        requireField(request.getEmail(), "email is required");
+   @Override
+public DriverResponse addDriver(AddDriverRequest request, String employerId) {
 
-        String driverId = findProfileIdByEmail(request.getEmail());
-        String driverDetailsUrl = supabaseUrl + "/rest/v1/driver_details?on_conflict=driver_id";
+    requireField(employerId, "employerId is required");
+    requireField(request.getEmail(), "email is required");
 
-        Map<String, Object> driverDetailsBody = new java.util.HashMap<>();
-        driverDetailsBody.put("driver_id", driverId);
-        driverDetailsBody.put("employer_id", employerId);
-        driverDetailsBody.put("license_no", request.getLicenseNo());
-        driverDetailsBody.put("name", request.getName());
-        driverDetailsBody.put("contact_no", request.getContactNumber());
-        driverDetailsBody.put("email", request.getEmail());
-        driverDetailsBody.put("updated_at", java.time.OffsetDateTime.now(java.time.ZoneOffset.UTC).toString());
+    String driverId = java.util.UUID.randomUUID().toString();
 
-        HttpHeaders headers = getHeaders();
-        headers.set("Prefer", "resolution=merge-duplicates,return=representation");
+    String driverTableUrl =
+            supabaseUrl + "/rest/v1/driver_table?on_conflict=driver_id";
 
-        HttpEntity<Map<String, Object>> driverDetailsEntity
-                = new HttpEntity<>(driverDetailsBody, headers);
+    Map<String, Object> body = new java.util.HashMap<>();
 
-        ResponseEntity<Map[]> driverDetailsResponse
-                = restTemplate.exchange(
-                        driverDetailsUrl,
-                        HttpMethod.POST,
-                        driverDetailsEntity,
-                        Map[].class
-                );
+    body.put("driver_id", driverId);
+    body.put("employer_id", employerId);
+    body.put("license_no", request.getLicenseNo());
+    body.put("name", request.getName());
+    body.put("contact_no", request.getContactNumber());
+    body.put("email", request.getEmail());
+
+    HttpHeaders headers = getHeaders();
+    headers.set("Prefer", "return=representation");
+
+    HttpEntity<Map<String, Object>> entity =
+            new HttpEntity<>(body, headers);
+
+    try {
+
+        ResponseEntity<Map[]> response = restTemplate.exchange(
+                driverTableUrl,
+                HttpMethod.POST,
+                entity,
+                Map[].class
+        );
 
         Map<String, Object> createdDriver = firstRow(
-                driverDetailsResponse.getBody(),
-                "Driver details row was not returned from Supabase"
+                response.getBody(),
+                "Driver was not created"
         );
 
         return DriverResponse.builder()
@@ -128,7 +137,21 @@ public class SupabaseOwnerService implements OwnerService {
                 .licenseNo(valueAsString(createdDriver.get("license_no")))
                 .busNo(null)
                 .build();
+
+    } catch (HttpStatusCodeException e) {
+
+        log.error(
+                "Driver creation failed. status={}, body={}",
+                e.getStatusCode(),
+                e.getResponseBodyAsString()
+        );
+
+        throw new RuntimeException(
+                "Driver creation failed: " +
+                        e.getResponseBodyAsString()
+        );
     }
+}
 
     // REMOVE DRIVER
     @Override
@@ -217,12 +240,18 @@ public class SupabaseOwnerService implements OwnerService {
         String profileUrl = supabaseUrl + "/rest/v1/profiles?email=eq." + encodedEmail + "&select=id";
 
         HttpEntity<Void> entity = new HttpEntity<>(getHeaders());
-        ResponseEntity<Map[]> profileResponse = restTemplate.exchange(
-                profileUrl,
-                HttpMethod.GET,
-                entity,
-                Map[].class
-        );
+        ResponseEntity<Map[]> profileResponse;
+        try {
+            profileResponse = restTemplate.exchange(
+                    profileUrl,
+                    HttpMethod.GET,
+                    entity,
+                    Map[].class
+            );
+        } catch (HttpStatusCodeException e) {
+            log.error("Supabase profile lookup failed. email={}, status={}, body={}", email, e.getStatusCode(), e.getResponseBodyAsString());
+            throw new RuntimeException("profile lookup failed: " + e.getStatusCode() + " " + e.getResponseBodyAsString(), e);
+        }
 
         Map<String, Object> profile = firstRow(
                 profileResponse.getBody(),
