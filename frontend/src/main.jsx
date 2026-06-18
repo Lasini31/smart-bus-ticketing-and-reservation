@@ -14,7 +14,7 @@ import App from './App.jsx'
 import Home from './components/home.jsx'
 import About from './components/about.jsx'
 import Login from './components/login.jsx'
-import Register from './components/register.jsx'
+import Register from './components/register.jsx' 
 import OwnerRegister from './components/ownerRegister.jsx'
 import BusSetup from './components/BusSetup.jsx'
 import Profile from './components/profile.jsx'
@@ -26,10 +26,13 @@ import PaymentPage from './components/paymentPage.jsx'
 import Contact from './components/Contact.jsx'
 import Bookings from './components/Bookings.jsx'
 import NotFound from './components/NotFound.jsx'
+import OwnerLayout from './owner/OwnerLayout.jsx'
 import { WalletProvider } from './contexts/WalletContext.jsx'
 import { AuthProvider } from './contexts/AuthContext.jsx'
 import { LanguageProvider } from './contexts/LanguageContext.jsx'
 import RequireAuth from './components/RequireAuth.jsx'
+import { RequireOwnerAuth } from './components/RequireAuth.jsx'
+import OwnerDashboard from './owner/OwnerDashboard.jsx'
 
 const router = createBrowserRouter(createRoutesFromElements(
   <>
@@ -50,6 +53,7 @@ const router = createBrowserRouter(createRoutesFromElements(
       <Route path='owner/bus-setup' element={<BusSetup />} />
       <Route path='profile' element={<RequireAuth><Profile /></RequireAuth>} />
     </Route>
+    <Route path='/owner/dashboard' element={<RequireOwnerAuth><OwnerDashboard /></RequireOwnerAuth>} />
   </>
 ))
 

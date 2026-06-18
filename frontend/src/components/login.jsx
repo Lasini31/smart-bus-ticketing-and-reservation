@@ -1,10 +1,11 @@
+// src/pages/Login.jsx
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.jsx'
 
 export default function Login() {
     const navigate = useNavigate()
-    const { login } = useAuth()
+    const { login, loading: authLoading } = useAuth()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
@@ -22,22 +23,50 @@ export default function Login() {
             return
         }
 
+        // Basic email validation
+        if (!email.includes('@') || !email.includes('.')) {
+            setError('Please enter a valid email address.')
+            return
+        }
+
         setIsLoading(true)
         try {
             // Call backend API to validate credentials
-            await login({ email: email.trim(), password: password.trim() })
-            // If successful, navigate to home
-            navigate('/')
+            // The AuthContext login expects { email, password }
+            const result = await login({ 
+                email: email.trim(), 
+                password: password.trim() 
+            })
+            
+            // If successful, redirect based on role
+            if (result.role === 'owner') {
+                navigate('/owner/dashboard')
+            } else {
+                const redirectTo = location.state?.from?.pathname || '/'
+                navigate(redirectTo)
+            }
+            
         } catch (err) {
             // Show error message from backend or generic message
-            setError(err.message || 'Invalid username or password')
+            setError(err.message || 'Invalid username or password. Please try again.')
         } finally {
             setIsLoading(false)
         }
     }
 
-    const handleForgotPassword = () => {
-        alert('Password reset instructions have been sent to your registered email/phone.')
+    const handleForgotPassword = async () => {
+        if (!email.trim()) {
+            setError('Please enter your email address to reset your password.')
+            return
+        }
+
+        try {
+            const { forgotPassword } = useAuth()
+            await forgotPassword(email.trim())
+            alert('Password reset instructions have been sent to your registered email.')
+        } catch (err) {
+            setError(err.message || 'Failed to send password reset email. Please try again.')
+        }
     }
 
     return (
@@ -75,7 +104,8 @@ export default function Login() {
                                 className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10"
                                 placeholder="Enter your email address"
                                 required
-                                disabled={isLoading}
+                                disabled={isLoading || authLoading}
+                                autoComplete="email"
                             />
                         </div>
                     </div>
@@ -90,7 +120,7 @@ export default function Login() {
                                 type="button" 
                                 onClick={handleForgotPassword}
                                 className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 hover:underline"
-                                disabled={isLoading}
+                                disabled={isLoading || authLoading}
                             >
                                 Forgot password?
                             </button>
@@ -103,14 +133,15 @@ export default function Login() {
                                 className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-4 pr-11 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10"
                                 placeholder="••••••••"
                                 required
-                                disabled={isLoading}
+                                disabled={isLoading || authLoading}
+                                autoComplete="current-password"
                             />
                             {/* Password Visibility Toggle Icon */}
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition"
-                                disabled={isLoading}
+                                disabled={isLoading || authLoading}
                             >
                                 {showPassword ? (
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
@@ -133,7 +164,7 @@ export default function Login() {
                             name="remember-me"
                             type="checkbox"
                             className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500/20"
-                            disabled={isLoading}
+                            disabled={isLoading || authLoading}
                         />
                         <label htmlFor="remember-me" className="ml-2 block text-xs font-medium text-slate-600 select-none">
                             Keep me logged in
@@ -143,10 +174,10 @@ export default function Login() {
                     {/* Submit Button */}
                     <button 
                         type="submit"
-                        disabled={isLoading}
-                        className="w-full rounded-xl bg-green-600 px-6 py-3.5 text-sm font-semibold text-white shadow-md transition hover:bg-green-700 active:scale-[0.99] focus:ring-4 focus:ring-green-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={isLoading || authLoading}
+                        className="w-full rounded-xl bg-emerald-600 px-6 py-3.5 text-sm font-semibold text-white shadow-md transition hover:bg-emerald-700 active:scale-[0.99] focus:ring-4 focus:ring-emerald-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {isLoading ? 'Signing In...' : 'Sign In securely'}
+                        {isLoading || authLoading ? 'Signing In...' : 'Sign In securely'}
                     </button>
                 </form>
 
