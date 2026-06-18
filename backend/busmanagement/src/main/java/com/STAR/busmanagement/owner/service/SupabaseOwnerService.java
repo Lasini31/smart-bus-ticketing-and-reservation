@@ -2,6 +2,7 @@ package com.STAR.busmanagement.owner.service;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -23,7 +24,6 @@ import com.STAR.busmanagement.owner.dto.AssignDriverRequest;
 import com.STAR.busmanagement.owner.dto.DriverResponse;
 import com.STAR.busmanagement.owner.dto.MessageResponse;
 import com.STAR.busmanagement.owner.dto.OwnerAnalyticsResponse;
-
 @Primary
 @Service
 public class SupabaseOwnerService implements OwnerService {
@@ -51,6 +51,51 @@ public class SupabaseOwnerService implements OwnerService {
         headers.set("Content-Profile", "public");
         return headers;
     }
+
+
+        // get all drivers for an employer
+    @Override
+        public List<DriverResponse> getDrivers(String employerId) {
+
+    String url =
+            supabaseUrl +
+            "/rest/v1/driver_table?employer_id=eq."
+            + employerId;
+
+    HttpEntity<Void> entity =
+            new HttpEntity<>(getHeaders());
+
+    ResponseEntity<Map[]> response =
+            restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    Map[].class
+            );
+
+    List<DriverResponse> drivers =
+            new java.util.ArrayList<>();
+
+    if (response.getBody() != null) {
+
+        for (Map row : response.getBody()) {
+
+            DriverResponse driver =
+                    DriverResponse.builder()
+                            .driverId(valueAsString(row.get("driver_id")))
+                            .name(valueAsString(row.get("name")))
+                            .email(valueAsString(row.get("email")))
+                            .contactNumber(valueAsString(row.get("contact_no")))
+                            .licenseNo(valueAsString(row.get("license_no")))
+                            .busNo(null)
+                            .build();
+
+            drivers.add(driver);
+        }
+    }
+
+    return drivers;
+}
 
     // ADD BUS
     @Override
@@ -163,7 +208,7 @@ public DriverResponse addDriver(AddDriverRequest request, String employerId) {
                     = new HttpEntity<>(getHeaders());
 
             String driverDetailsUrl
-                    = supabaseUrl + "/rest/v1/driver_details?driver_id=eq." + driverId;
+                    = supabaseUrl + "/rest/v1/driver_table?driver_id=eq." + driverId;
 
             restTemplate.exchange(
                     driverDetailsUrl,
@@ -208,7 +253,7 @@ public DriverResponse addDriver(AddDriverRequest request, String employerId) {
     @Override
     public OwnerAnalyticsResponse getAnalytics() {
         String busUrl = supabaseUrl + "/rest/v1/buses?select=count";
-        String driverUrl = supabaseUrl + "/rest/v1/driver_details?select=count";
+        String driverUrl = supabaseUrl + "/rest/v1/driver_table?select=count";
 
         HttpEntity<Void> entity = new HttpEntity<>(getHeaders());
 

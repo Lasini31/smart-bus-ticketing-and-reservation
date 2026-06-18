@@ -1,11 +1,24 @@
 package com.STAR.busmanagement.owner.controller;
 
-import com.STAR.busmanagement.owner.dto.*;
-import com.STAR.busmanagement.owner.service.OwnerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.STAR.busmanagement.owner.dto.AddBusRequest;
+import com.STAR.busmanagement.owner.dto.AddDriverRequest;
+import com.STAR.busmanagement.owner.dto.AssignDriverRequest;
+import com.STAR.busmanagement.owner.dto.DriverResponse;
+import com.STAR.busmanagement.owner.dto.MessageResponse;
+import com.STAR.busmanagement.owner.dto.OwnerAnalyticsResponse;
+import com.STAR.busmanagement.owner.service.OwnerService;
 
 @RestController
 @RequestMapping("/owner")
@@ -16,6 +29,35 @@ public class OwnerController {
     public OwnerController(OwnerService ownerService) {
         this.ownerService = ownerService;
     }
+
+
+    //  get owners data
+    @GetMapping("/drivers")
+    public ResponseEntity<?> getDrivers(Authentication authentication) {
+
+    try {
+
+        if (authentication == null ||
+            authentication.getName() == null ||
+            authentication.getName().isBlank()) {
+
+            throw new IllegalArgumentException("Owner session is required");
+        }
+
+        return ResponseEntity.ok(
+                ownerService.getDrivers(authentication.getName())
+        );
+
+    } catch (Exception e) {
+
+        return ResponseEntity.badRequest().body(
+                MessageResponse.builder()
+                        .success(false)
+                        .message(e.getMessage())
+                        .build()
+        );
+    }
+}
 
     // POST /owner/buses — Add a new bus
     @PostMapping("/buses")
