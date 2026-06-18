@@ -81,6 +81,14 @@ export default function Home() {
   const [to, setTo] = useState("");
   const [date, setDate] = useState("");
 
+  useEffect(() => {
+    console.log("Raw user object:", user);
+    console.log("Is user truthy?:", !!user);
+    if (user) {
+      console.log("Keys inside user object:", Object.keys(user));
+    }
+  }, [user]);
+
   const goTo = useCallback((idxOrFn) => {
     setCurrent((prev) => {
       const next = typeof idxOrFn === "function" ? idxOrFn(prev) : idxOrFn;
@@ -100,7 +108,7 @@ export default function Home() {
   const today = new Date().toISOString().split("T")[0];
 
   return (
-    <div className="min-h-screen bg-white font-sans -mt-[82px]">
+    <div className="min-h-screen bg-white font-sans -mt-[4.5rem]">
 
       {/* ─── HERO SLIDER ──────────────────────────────────────────────
           FIX 1: height is 75vh (3/4 screen), full width
@@ -109,7 +117,7 @@ export default function Home() {
           FIX 3: search bar lives in its own fixed-position layer so
                  text animation never shifts it
       ──────────────────────────────────────────────────────────────── */}
-      <section className="relative w-full overflow-hidden" style={{ height: "75vh", minHeight: 480 }}>
+      <section className="relative w-full overflow-hidden" style={{ height: "100vh", minHeight: 560 }}>
 
         {/* IMAGE STACK — FIX 2: plain CSS crossfade, no blank frame */}
         {SLIDES.map((slide, i) => (
@@ -128,76 +136,79 @@ export default function Home() {
         {/* OVERLAY */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/65 z-10" />
 
-        {/* TEXT LAYER — FIX 3: anchored to upper-centre, animates independently */}
-        <div className="absolute inset-x-0 top-12 z-20 flex flex-col items-center justify-center px-4 text-center"
-             style={{ height: "55%" }}>
-          <div key={textKey} style={{ animation: "fadeSlideUp 0.6s ease both" }}>
-            <span className="inline-block rounded-full bg-green-500/20 border border-green-400/40 px-4 py-1 text-xs font-semibold text-green-300 tracking-widest uppercase mb-4 backdrop-blur-sm">
-              Sri Lanka's #1 Bus Platform
-            </span>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight max-w-3xl">
-              {SLIDES[current].label}
-            </h1>
-            <p className="mt-3 text-base sm:text-lg text-white/75 max-w-xl mx-auto">
-              {SLIDES[current].sub}
-            </p>
-          </div>
-        </div>
+        {/* CONTENT LAYER: flex column with text on top, search bar pinned at bottom */}
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-between px-4 pt-[4.5rem] pb-6">
 
-        {/* SEARCH BAR LAYER — FIX 3: fixed at bottom-centre of hero, never moves */}
-        <div className="absolute inset-x-0 bottom-5 z-20 flex flex-col items-center px-4 pb-8">
-          <div className="w-full max-w-4xl bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 shadow-2xl">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="flex flex-col bg-white rounded-xl px-4 py-3 gap-1">
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">From</label>
-                <input
-                  type="text"
-                  placeholder="Origin city..."
-                  value={from}
-                  onChange={(e) => setFrom(e.target.value)}
-                  className="text-slate-900 font-semibold text-sm outline-none bg-transparent placeholder-slate-400"
-                />
-              </div>
-              <div className="flex flex-col bg-white rounded-xl px-4 py-3 gap-1">
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">To</label>
-                <input
-                  type="text"
-                  placeholder="Destination city..."
-                  value={to}
-                  onChange={(e) => setTo(e.target.value)}
-                  className="text-slate-900 font-semibold text-sm outline-none bg-transparent placeholder-slate-400"
-                />
-              </div>
-              <div className="flex flex-col bg-white rounded-xl px-4 py-3 gap-1">
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Travel Date</label>
-                <input
-                  type="date"
-                  min={today}
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="text-slate-900 font-semibold text-sm outline-none bg-transparent"
-                />
-              </div>
-            </div>
-            <div className="mt-3">
-              <a
-                href={`/booking?from=${from}&to=${to}&date=${date}`}
-                className="block w-full text-center rounded-xl bg-green-600 hover:bg-green-700 transition-all text-white font-bold py-3.5 text-base shadow-lg shadow-green-900/30"
-              >
-                Search Available Buses
-              </a>
+          {/* TEXT ZONE — takes up remaining space above search bar */}
+          <div className="flex flex-col items-center justify-center flex-1 text-center max-w-3xl w-full min-h-0 overflow-hidden">
+            <div key={textKey} style={{ animation: "fadeSlideUp 0.6s ease both" }}>
+              <span className="inline-block rounded-full bg-green-500/20 border border-green-400/40 px-4 py-1 text-xs font-semibold text-green-300 tracking-widest uppercase mb-4 backdrop-blur-sm">
+                Sri Lanka's #1 Bus Platform
+              </span>
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white leading-tight">
+                {SLIDES[current].label}
+              </h1>
+              <p className="mt-3 text-sm sm:text-lg text-white/75 max-w-xl mx-auto line-clamp-2">
+                {SLIDES[current].sub}
+              </p>
             </div>
           </div>
 
-          {/* Slide dots */}
-          <div className="flex gap-2 mt-4">
-            {SLIDES.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => goTo(i)}
-                className={`h-1.5 rounded-full transition-all duration-300 ${i === current ? "bg-green-400 w-8" : "bg-white/40 w-3 hover:bg-white/60"}`}
-              />
-            ))}
+          {/* SEARCH BAR ZONE — fixed at bottom */}
+          <div className="w-full max-w-4xl flex flex-col items-center gap-3">
+            <div className="w-full bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-4 shadow-2xl">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="flex flex-col bg-white rounded-xl px-4 py-3 gap-1">
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">From</label>
+                  <input
+                    type="text"
+                    placeholder="Origin city..."
+                    value={from}
+                    onChange={(e) => setFrom(e.target.value)}
+                    className="text-slate-900 font-semibold text-sm outline-none bg-transparent placeholder-slate-400"
+                  />
+                </div>
+                <div className="flex flex-col bg-white rounded-xl px-4 py-3 gap-1">
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">To</label>
+                  <input
+                    type="text"
+                    placeholder="Destination city..."
+                    value={to}
+                    onChange={(e) => setTo(e.target.value)}
+                    className="text-slate-900 font-semibold text-sm outline-none bg-transparent placeholder-slate-400"
+                  />
+                </div>
+                <div className="flex flex-col bg-white rounded-xl px-4 py-3 gap-1">
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Travel Date</label>
+                  <input
+                    type="date"
+                    min={today}
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="text-slate-900 font-semibold text-sm outline-none bg-transparent"
+                  />
+                </div>
+              </div>
+              <div className="mt-3">
+                <a
+                  href={`/booking?from=${from}&to=${to}&date=${date}`}
+                  className="block w-full text-center rounded-xl bg-green-600 hover:bg-green-700 transition-all text-white font-bold py-3.5 text-base shadow-lg shadow-green-900/30"
+                >
+                  Search Available Buses
+                </a>
+              </div>
+            </div>
+
+            {/* Slide dots */}
+            <div className="flex gap-2">
+              {SLIDES.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => goTo(i)}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${i === current ? "bg-green-400 w-8" : "bg-white/40 w-3 hover:bg-white/60"}`}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
