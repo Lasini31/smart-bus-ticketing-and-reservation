@@ -11,6 +11,9 @@ spring:
     url: jdbc:postgresql://db.rpbufjokybeukqcdfumq.supabase.co:5432/postgres
     username: postgres
     password: 9KMUZZV2cZ8J0HDS
+    hikari:
+      maximum-pool-size: 5  # Limits how many connections this app can open
+      minimum-idle: 1       # Doesn't hold onto unused connections aggressively
   jpa:
     hibernate:
       ddl-auto: update
