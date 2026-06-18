@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; 
+import { useAuth } from '../contexts/AuthContext.jsx'; // Import useAuth
 
 export default function Register() {
   // --- STATE VARIABLES ---
@@ -17,11 +18,11 @@ export default function Register() {
   const [passwordScore, setPasswordScore] = useState(0);
   const [fieldErrors, setFieldErrors] = useState({});
 
-  const navigate = useNavigate(); // Initialize the navigation tool
+  const navigate = useNavigate();
+  const { login } = useAuth(); // Get login function from AuthContext
 
-  // --- GOOGLE SIGN UP HANDLER ---
   const handleGoogleSignUp = () => {
-    setErrorMessage(''); 
+    setErrorMessage('');
 
     if (!role) {
       setErrorMessage("Please select a role before signing up with Google.");
@@ -68,8 +69,8 @@ export default function Register() {
 
   // --- SUBMIT FUNCTION FOR MANUAL SIGN UP ---
   const handleSubmit = async (event) => {
-    event.preventDefault(); 
-    setErrorMessage(''); 
+    event.preventDefault();
+    setErrorMessage('');
 
     if (!role) {
       setErrorMessage("Please select a role before signing up manually.");
@@ -81,16 +82,18 @@ export default function Register() {
       return;
     }
 
-    // --- PREPARE DATA FOR BACKEND ---
-const userData = {
-  email: email,
-  password: password,
-  role: role
-};
+    const userData = {
+      name: name,
+      email: email,
+      password: password,
+      contactNumber: phone, // Using 'contactNumber' as per API contract
+      role: role
+    };
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8081/auth/register', {
+      // First, register the user
+      const registerResponse = await fetch('http://localhost:8081/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -98,24 +101,45 @@ const userData = {
         body: JSON.stringify(userData),
       });
 
-      const data = await response.json();
+      const registerData = await registerResponse.json();
 
-      if (response.ok) {
-        // clear sensitive fields
-        setPassword('');
-        setConfirmPassword('');
-        // If owner, redirect to bus setup
-        if (role === 'owner') {
-          navigate('/owner/bus-setup');  
-        } else {
-          navigate('/'); //////////////////////////////////////////////////////////
-        }
-      } else {
-        setErrorMessage(data.message || "Registration failed. Please try again.");
+      if (!registerResponse.ok) {
+        setErrorMessage(registerData.message || registerData.error?.message || "Registration failed. Please try again.");
+        setLoading(false);
+        return;
       }
 
+      // Registration successful - now auto-login
+      try {
+        // Call the login function from AuthContext
+        await login({ 
+          email: email, 
+          password: password 
+        });
+
+        // Clear sensitive fields
+        setPassword('');
+        setConfirmPassword('');
+
+        // Navigate based on role
+        if (role === 'owner') {
+          navigate('/owner/bus-setup');
+        } else {
+          navigate('/');
+        }
+      } catch (loginError) {
+        // If login fails, redirect to login page
+        console.error('Auto-login failed:', loginError);
+        setErrorMessage('Account created! Please login manually.');
+        navigate('/login', { 
+          state: { 
+            message: 'Account created successfully! Please login.',
+            email: email 
+          } 
+        });
+      }
     } catch (error) {
-      console.log("Failed to connect to backend", error);
+      console.error("Registration error:", error);
       setErrorMessage("Server error. Please make sure the backend is running.");
     } finally {
       setLoading(false);
@@ -148,9 +172,9 @@ const userData = {
   return (
     <div className="flex min-h-screen bg-white">
       <div className="hidden md:flex w-1/2 justify-center items-center p-12">
-        <img 
-          src="/bus.png" 
-          alt="White Bus" 
+        <img
+          src="/bus.png"
+          alt="Bus"
           className="w-full max-w-lg object-contain"
         />
       </div>
@@ -177,10 +201,13 @@ const userData = {
               {fieldErrors.name && <div id="error-name" className="text-sm text-red-600 mt-1">{fieldErrors.name}</div>}
             </div>
 
+            {/* Phone */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-              <input 
-                type="tel" 
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Phone Number
+              </label>
+              <input
+                type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 required
@@ -192,10 +219,13 @@ const userData = {
               {fieldErrors.phone && <div id="error-phone" className="text-sm text-red-600 mt-1">{fieldErrors.phone}</div>}
             </div>
 
+            {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input 
-                type="email" 
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email
+              </label>
+              <input
+                type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -256,7 +286,7 @@ const userData = {
             {fieldErrors.terms && <div className="text-sm text-red-600">{fieldErrors.terms}</div>}
 
             {errorMessage && (
-              <div className="text-red-500 text-sm font-medium mt-2">
+              <div className="text-red-500 text-sm font-medium">
                 {errorMessage}
               </div>
             )}
@@ -269,8 +299,12 @@ const userData = {
           </form>
 
           <div className="text-center mt-6">
-            <p className="text-xs text-gray-600 font-medium">Already have an account?</p>
-            <a href="/login" className="text-xs text-green-500 hover:underline">Login</a>
+            <p className="text-xs text-gray-600 font-medium">
+              Already have an account?
+            </p>
+            <a href="/login" className="text-xs text-green-500 hover:underline">
+              Login
+            </a>
           </div>
         </div>
       </div>
