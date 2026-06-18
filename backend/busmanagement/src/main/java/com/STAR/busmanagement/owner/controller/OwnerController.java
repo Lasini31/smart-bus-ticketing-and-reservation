@@ -12,12 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.STAR.busmanagement.owner.dto.AddBusRequest;
-import com.STAR.busmanagement.owner.dto.AddDriverRequest;
-import com.STAR.busmanagement.owner.dto.AssignDriverRequest;
-import com.STAR.busmanagement.owner.dto.DriverResponse;
-import com.STAR.busmanagement.owner.dto.MessageResponse;
-import com.STAR.busmanagement.owner.dto.OwnerAnalyticsResponse;
+import com.STAR.busmanagement.owner.dto.*;
 import com.STAR.busmanagement.owner.service.OwnerService;
 
 @RestController
@@ -30,56 +25,44 @@ public class OwnerController {
         this.ownerService = ownerService;
     }
 
-
-    //  get owners data
-    @GetMapping("/drivers")
-    public ResponseEntity<?> getDrivers(Authentication authentication) {
-
-    try {
-
+    private String getOwnerId(Authentication authentication) {
         if (authentication == null ||
             authentication.getName() == null ||
             authentication.getName().isBlank()) {
-
             throw new IllegalArgumentException("Owner session is required");
         }
-
-        return ResponseEntity.ok(
-                ownerService.getDrivers(authentication.getName())
-        );
-
-    } catch (Exception e) {
-
-        return ResponseEntity.badRequest().body(
-                MessageResponse.builder()
-                        .success(false)
-                        .message(e.getMessage())
-                        .build()
-        );
+        return authentication.getName();
     }
-}
 
     // POST /owner/buses — Add a new bus
     @PostMapping("/buses")
-    public ResponseEntity<MessageResponse> addBus(@RequestBody AddBusRequest request) {
+    public ResponseEntity<?> addBus(@RequestBody AddBusRequest request, Authentication authentication) {
         try {
-            MessageResponse response = ownerService.addBus(request);
+            String ownerId = getOwnerId(authentication);
+            MessageResponse response = ownerService.addBus(request, ownerId);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(MessageResponse.builder().success(false).message(e.getMessage()).build());
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(MessageResponse.builder().message(e.getMessage()).build());
+                    .body(MessageResponse.builder().success(false).message(e.getMessage()).build());
         }
     }
 
     // DELETE /owner/buses/{busNo} — Remove a bus
     @DeleteMapping("/buses/{busNo}")
-    public ResponseEntity<MessageResponse> removeBus(@PathVariable String busNo) {
+    public ResponseEntity<?> removeBus(@PathVariable String busNo, Authentication authentication) {
         try {
+            getOwnerId(authentication);
             MessageResponse response = ownerService.removeBus(busNo);
             return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(MessageResponse.builder().success(false).message(e.getMessage()).build());
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(MessageResponse.builder().message(e.getMessage()).build());
+                    .body(MessageResponse.builder().success(false).message(e.getMessage()).build());
         }
     }
 
@@ -87,11 +70,8 @@ public class OwnerController {
     @PostMapping("/drivers")
     public ResponseEntity<?> addDriver(@RequestBody AddDriverRequest request, Authentication authentication) {
         try {
-            if (authentication == null || authentication.getName() == null || authentication.getName().isBlank()) {
-                throw new IllegalArgumentException("Owner session is required");
-            }
-
-            DriverResponse response = ownerService.addDriver(request, authentication.getName());
+            String ownerId = getOwnerId(authentication);
+            DriverResponse response = ownerService.addDriver(request, ownerId);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -104,34 +84,124 @@ public class OwnerController {
 
     // DELETE /owner/drivers/{id} — Remove a driver
     @DeleteMapping("/drivers/{id}")
-    public ResponseEntity<MessageResponse> removeDriver(@PathVariable String id) {
+    public ResponseEntity<?> removeDriver(@PathVariable String id, Authentication authentication) {
         try {
+            getOwnerId(authentication);
             MessageResponse response = ownerService.removeDriver(id);
             return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(MessageResponse.builder().success(false).message(e.getMessage()).build());
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(MessageResponse.builder().message(e.getMessage()).build());
+                    .body(MessageResponse.builder().success(false).message(e.getMessage()).build());
         }
     }
 
     // PUT /owner/buses/{busNo}/driver — Assign driver to bus
     @PutMapping("/buses/{busNo}/driver")
-    public ResponseEntity<MessageResponse> assignDriver(
+    public ResponseEntity<?> assignDriver(
             @PathVariable String busNo,
-            @RequestBody AssignDriverRequest request) {
+            @RequestBody AssignDriverRequest request,
+            Authentication authentication) {
         try {
+            getOwnerId(authentication);
             MessageResponse response = ownerService.assignDriver(busNo, request);
             return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(MessageResponse.builder().success(false).message(e.getMessage()).build());
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(MessageResponse.builder().message(e.getMessage()).build());
+                    .body(MessageResponse.builder().success(false).message(e.getMessage()).build());
         }
     }
 
     // GET /owner/analytics — View analytics report
     @GetMapping("/analytics")
-    public ResponseEntity<OwnerAnalyticsResponse> getAnalytics() {
-        OwnerAnalyticsResponse response = ownerService.getAnalytics();
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> getAnalytics(Authentication authentication) {
+        try {
+            getOwnerId(authentication);
+            OwnerAnalyticsResponse response = ownerService.getAnalytics();
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(MessageResponse.builder().success(false).message(e.getMessage()).build());
+        }
+    }
+
+    // GET /owner/buses — Get all buses for logged in owner
+    @GetMapping("/buses")
+    public ResponseEntity<?> getBusesByOwner(Authentication authentication) {
+        try {
+            String ownerId = getOwnerId(authentication);
+            return ResponseEntity.ok(ownerService.getBusesByOwner(ownerId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(MessageResponse.builder().success(false).message(e.getMessage()).build());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(
+                    MessageResponse.builder().success(false).message(e.getMessage()).build());
+        }
+    }
+
+    // GET /owner/my-drivers — Get all drivers for logged in owner
+    @GetMapping("/my-drivers")
+    public ResponseEntity<?> getDriversByOwner(Authentication authentication) {
+        try {
+            String ownerId = getOwnerId(authentication);
+            return ResponseEntity.ok(ownerService.getDriversByOwner(ownerId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(MessageResponse.builder().success(false).message(e.getMessage()).build());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(
+                    MessageResponse.builder().success(false).message(e.getMessage()).build());
+        }
+    }
+
+    // GET /owner/drivers — Get drivers list for logged in owner
+    @GetMapping("/drivers")
+    public ResponseEntity<?> getDrivers(Authentication authentication) {
+        try {
+            String ownerId = getOwnerId(authentication);
+            return ResponseEntity.ok(ownerService.getDrivers(ownerId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(MessageResponse.builder().success(false).message(e.getMessage()).build());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(
+                    MessageResponse.builder().success(false).message(e.getMessage()).build());
+        }
+    }
+
+    // GET /owner/routes — Get all routes for dropdown
+    @GetMapping("/routes")
+    public ResponseEntity<?> getRoutes(Authentication authentication) {
+        try {
+            getOwnerId(authentication);
+            return ResponseEntity.ok(ownerService.getRoutes());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(MessageResponse.builder().success(false).message(e.getMessage()).build());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(
+                    MessageResponse.builder().success(false).message(e.getMessage()).build());
+        }
+    }
+
+    // GET /owner/bus-types — Get all bus types for dropdown
+    @GetMapping("/bus-types")
+    public ResponseEntity<?> getBusTypes(Authentication authentication) {
+        try {
+            getOwnerId(authentication);
+            return ResponseEntity.ok(ownerService.getBusTypes());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(MessageResponse.builder().success(false).message(e.getMessage()).build());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(
+                    MessageResponse.builder().success(false).message(e.getMessage()).build());
+        }
     }
 }
