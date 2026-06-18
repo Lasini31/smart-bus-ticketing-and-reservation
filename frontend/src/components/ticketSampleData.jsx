@@ -9,7 +9,16 @@ export const SAMPLE_TICKETS = [
     date: '15-Dec-2020',
     price: 'Rs 1400.00',
     pricePerSeat: 1400,
-    seatsAvailable: 15
+    seatsAvailable: 15,
+    totalSeats: 40,
+    busNumber: 'NCG-001',
+    driver: 'S. Perera',
+    conductor: 'K. Silva',
+    driverPhone: '+94 77 123 4567',
+    conductorPhone: '+94 71 987 6543',
+    arrivalTime: '1:00 PM',
+    expectedArrivalTime: '1:30 PM',
+    bookedSeats: [1,2,3,7,8,12]
   },
   {
     id: 2,
@@ -20,7 +29,16 @@ export const SAMPLE_TICKETS = [
     date: '15-Dec-2020',
     price: 'Rs 1400.00',
     pricePerSeat: 1400,
-    seatsAvailable: 8
+    seatsAvailable: 8,
+    totalSeats: 36,
+    busNumber: 'DS-221',
+    driver: 'M. Gunasekara',
+    conductor: 'H. Fernando',
+    driverPhone: '+94 77 222 3333',
+    conductorPhone: '+94 71 444 5555',
+    arrivalTime: '1:15 PM',
+    expectedArrivalTime: '1:45 PM',
+    bookedSeats: [4,5,6,10,11,15,16,20,21,22,30,31,32,33]
   },
   {
     id: 3,
@@ -31,7 +49,16 @@ export const SAMPLE_TICKETS = [
     date: '15-Dec-2020',
     price: 'Rs 1200.00',
     pricePerSeat: 1200,
-    seatsAvailable: 20
+    seatsAvailable: 20,
+    totalSeats: 40,
+    busNumber: 'NCG-002',
+    driver: 'R. Jayasinghe',
+    conductor: 'L. Perera',
+    driverPhone: '+94 77 333 4444',
+    conductorPhone: '+94 71 666 7777',
+    arrivalTime: '2:30 PM',
+    expectedArrivalTime: '3:00 PM',
+    bookedSeats: [2,9,14,18,19,24]
   },
   {
     id: 4,
@@ -42,7 +69,16 @@ export const SAMPLE_TICKETS = [
     date: '16-Dec-2020',
     price: 'Rs 800.00',
     pricePerSeat: 800,
-    seatsAvailable: 5
+    seatsAvailable: 5,
+    totalSeats: 32,
+    busNumber: 'ELT-45',
+    driver: 'N. Silva',
+    conductor: 'P. Jayawardena',
+    driverPhone: '+94 77 555 6666',
+    conductorPhone: '+94 71 222 3333',
+    arrivalTime: '5:00 PM',
+    expectedArrivalTime: '5:30 PM',
+    bookedSeats: [1,4,7,8,12,13,14,20,21,22,25]
   },
   {
     id: 5,
@@ -53,6 +89,15 @@ export const SAMPLE_TICKETS = [
     date: '17-Dec-2020',
     price: 'Rs 950.00',
     pricePerSeat: 950,
-    seatsAvailable: 12
+    seatsAvailable: 12,
+    totalSeats: 40,
+    busNumber: 'SUN-10',
+    driver: 'A. Kumara',
+    conductor: 'D. Perera',
+    driverPhone: '+94 77 888 9999',
+    conductorPhone: '+94 71 111 2222',
+    arrivalTime: '10:00 AM',
+    expectedArrivalTime: '10:45 AM',
+    bookedSeats: [3,5,6,9,11,17,18,19]
   },
 ];

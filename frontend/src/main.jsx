@@ -1,9 +1,8 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import PaymentPage from './components/PaymentPage.jsx'
 
-import React, { Suspense } from 'react'
+import React from 'react'
 import {
   createBrowserRouter,
   createRoutesFromElements,
@@ -11,68 +10,60 @@ import {
   RouterProvider
 } from 'react-router-dom'
 
-//import Loader from './loader.jsx'
-
-// Public imports
-//import AppWrapper from './AppWrapper'
-// //import Error from './erorr.jsx'
-//import NotFound from './notFound.jsx'
 import App from './App.jsx'
 import Home from './components/home.jsx'
+import About from './components/about.jsx'
+import Login from './components/login.jsx'
+import Register from './components/register.jsx'
+import OwnerRegister from './components/ownerRegister.jsx'
+import BusSetup from './components/BusSetup.jsx'
+import Profile from './components/profile.jsx'
 import TicketBooking from './components/ticketBooking.jsx'
 import Wallet from './components/wallet.jsx'
-
-// Admin imports goes here
+import SeatSelection from './components/SeatSelection.jsx'
+import TicketDownload from './components/TicketDownload.jsx'
+import PaymentPage from './components/paymentPage.jsx'
+import Contact from './components/Contact.jsx'
+import Bookings from './components/Bookings.jsx'
+import NotFound from './components/NotFound.jsx'
+import { WalletProvider } from './contexts/WalletContext.jsx'
+import { AuthProvider } from './contexts/AuthContext.jsx'
+import { LanguageProvider } from './contexts/LanguageContext.jsx'
+import RequireAuth from './components/RequireAuth.jsx'
 
 const router = createBrowserRouter(createRoutesFromElements(
   <>
-    {/* Public Routes */}
-    <Route path='/' element={<App />} > {/*errorElement={<Error />}*/} 
-      <Route
-          index
-          element={<Home/>}
-        />
-      <Route
-          path='payment'
-          element={<PaymentPage/>}
-          />
-      <Route
-          path='booking'
-          element={<TicketBooking/>}
-        />
-      <Route
-          path='wallet'
-          element={<Wallet/>}
-        />
+    <Route path='/' element={<App />}>
+      <Route index element={<Home />} />
+      <Route path='booking' element={<RequireAuth><TicketBooking /></RequireAuth>} />
+      <Route path='booking/select' element={<RequireAuth><SeatSelection /></RequireAuth>} />
+      <Route path='booking/ticket' element={<RequireAuth><TicketDownload /></RequireAuth>} />
+      <Route path='bookings' element={<RequireAuth><Bookings /></RequireAuth>} />
+      <Route path='wallet' element={<RequireAuth><Wallet /></RequireAuth>} />
+      <Route path='payment' element={<RequireAuth><PaymentPage /></RequireAuth>} />
+      <Route path='contact' element={<Contact />} />
+      <Route path='*' element={<NotFound />} />
+      <Route path='about' element={<About />} />
+      <Route path='login' element={<Login />} />
+      <Route path='register' element={<Register />} />
+      <Route path='owner-register' element={<OwnerRegister />} />
+      <Route path='owner/bus-setup' element={<BusSetup />} />
+      <Route path='profile' element={<RequireAuth><Profile /></RequireAuth>} />
     </Route>
   </>
-));
-
-/*example 
-<Route
-  path='posts'
-  element={<Posts/>}
-  loader={PostLoader}
-  errorElement={<Error />}
-/>
-
-after add loader
-<Route element={<AppWrapper/>} >
-        <Route
-          index
-          element={<Home/>}
-        />
-      </Route>
-
-*/
-
+))
 
 function Index() {
   return (
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <LanguageProvider>
+        <WalletProvider>
+          <RouterProvider router={router} />
+        </WalletProvider>
+      </LanguageProvider>
+    </AuthProvider>
   )
 }
-
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

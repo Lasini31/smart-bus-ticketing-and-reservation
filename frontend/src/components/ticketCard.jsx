@@ -1,4 +1,12 @@
-export default function TicketCard({ ticket, travelers }) {
+import { useNavigate } from 'react-router-dom';
+
+export default function TicketCard({ ticket, travelers = 1 }) {
+  const navigate = useNavigate();
+
+  const handleBuy = () => {
+    navigate('/booking/select', { state: { ticket, travelers: 0 } });
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition">
       <div className="flex items-center gap-4">
@@ -41,22 +49,16 @@ export default function TicketCard({ ticket, travelers }) {
 
 
           {/* Buy Ticket Button */}
-          <button 
-            disabled={travelers > ticket.seatsAvailable}
-            className={`font-bold py-1.5 px-5 rounded-full transition mb-2 text-sm ${
-              travelers > ticket.seatsAvailable
-                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                : 'bg-green-600 hover:bg-green-700 text-white'
-            }`}
+          <button
+            onClick={handleBuy}
+            className="font-bold py-1.5 px-5 rounded-full transition mb-2 text-sm bg-green-600 hover:bg-green-700 text-white"
           >
-            {travelers > ticket.seatsAvailable ? 'Buy Ticket' : 'Buy Ticket'}
+            Buy Ticket
           </button>
 
           {/* Price */}
           <p className="text-xs text-gray-600">Price/Seat:</p>
           <p className="text-sm font-bold text-red-600">Rs {ticket.pricePerSeat}</p>
-          <p className="text-xs text-gray-600 mt-1">Total ({travelers}):</p>
-          <p className="text-sm font-bold text-green-600">Rs {(ticket.pricePerSeat * travelers).toFixed(2)}</p>
         </div>
       </div>
     </div>

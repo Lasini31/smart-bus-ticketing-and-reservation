@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+//To test the effect MockAuthService takes role as "passenger" for all actions.
+
+
 @Service
 public class MockAuthService implements AuthService {
 
