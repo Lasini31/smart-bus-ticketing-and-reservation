@@ -9,4 +9,6 @@ public class AddBusRequest {
     private String busTypeId;
     private String ownerId;
     private String status;
+    private Double targetIncome;
+    private String assignedDriverId;
 }
