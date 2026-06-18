@@ -77,7 +77,7 @@ export default function BusSetup() {
   async function saveAll() {
     // send to backend - endpoint depends on backend design
     try {
-      const response = await fetch('http://localhost:5000/api/owner/buses', {
+      const response = await fetch('http://localhost:8081/api/owner/buses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ buses }),

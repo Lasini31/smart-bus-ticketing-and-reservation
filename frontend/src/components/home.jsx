@@ -81,6 +81,14 @@ export default function Home() {
   const [to, setTo] = useState("");
   const [date, setDate] = useState("");
 
+  useEffect(() => {
+    console.log("Raw user object:", user);
+    console.log("Is user truthy?:", !!user);
+    if (user) {
+      console.log("Keys inside user object:", Object.keys(user));
+    }
+  }, [user]);
+
   const goTo = useCallback((idxOrFn) => {
     setCurrent((prev) => {
       const next = typeof idxOrFn === "function" ? idxOrFn(prev) : idxOrFn;

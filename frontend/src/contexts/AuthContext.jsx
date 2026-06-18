@@ -60,7 +60,7 @@ export function AuthProvider({ children }) {
       login,
       authUrl: API_BASE + '/auth'
     }),
-    [user]
+    [user, setUser, logout, login]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
