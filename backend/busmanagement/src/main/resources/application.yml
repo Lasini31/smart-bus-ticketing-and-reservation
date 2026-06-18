@@ -1,13 +1,23 @@
 server:
   port: 8081
 
+app:
+  auth:
+    mock: true
+
 spring:
+  datasource:
+    url: jdbc:postgresql://db.rpbufjokybeukqcdfumq.supabase.co:5432/postgres
+    username: postgres
+    password: 9KMUZZV2cZ8J0HDS
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
   security:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: SUPABASE_URL/auth/v1/keys
-
-app:
-  auth:
-    mock: false
+          jwk-set-uri: https://rpbufjokybeukqcdfumq.supabase.co/auth/v1/keys
