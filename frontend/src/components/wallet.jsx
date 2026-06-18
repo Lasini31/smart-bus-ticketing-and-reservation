@@ -1,11 +1,30 @@
-import { useMemo, useState } from 'react'
+// src/pages/Wallet.jsx
+import { useMemo, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useWallet } from '../contexts/WalletContext.jsx'
+import { useAuth } from '../contexts/AuthContext.jsx'
 
 const TOP_UP_OPTIONS = [500, 1000, 2000, 5000]
 
 export default function Wallet() {
-  const { balance, transactions, refund, cancelBooking } = useWallet()
+  const { 
+    balance, 
+    transactions, 
+    refund, 
+    cancelBooking, 
+    loading, 
+    error,
+    refreshWallet 
+  } = useWallet()
+  const { 
+    isAuthenticated, 
+    userId, 
+    token,
+    loading: authLoading,
+    user 
+  } = useAuth()
+  const navigate = useNavigate()
+
   const [selectedAmount, setSelectedAmount] = useState(1000)
   const [customTopUp, setCustomTopUp] = useState('')
   const [refundAmount, setRefundAmount] = useState('')
@@ -14,7 +33,26 @@ export default function Wallet() {
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [cancelReason, setCancelReason] = useState('')
   const [selectedTransaction, setSelectedTransaction] = useState(null)
-  const navigate = useNavigate()
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+
+  // Check authentication and redirect
+  useEffect(() => {
+    // Wait for auth to load
+    if (!authLoading) {
+      setIsCheckingAuth(false)
+      if (!isAuthenticated) {
+        navigate('/login', { state: { redirectTo: '/wallet' } })
+      }
+    }
+  }, [isAuthenticated, authLoading, navigate])
+
+  // Refresh wallet data when authenticated
+  useEffect(() => {
+    if (isAuthenticated && userId && token && !authLoading) {
+      refreshWallet()
+    }
+  }, [isAuthenticated, userId, token, authLoading, refreshWallet])
 
   const availableSpending = useMemo(() => balance.toFixed(2), [balance])
 
@@ -50,28 +88,80 @@ export default function Wallet() {
     navigate('/payment', { state: { amount } })
   }
 
-  function handleRefund() {
+  async function handleRefund() {
     const amount = Number(refundAmount)
-    if (!amount || amount <= 0) return
+    if (!amount || amount <= 0) {
+      alert('Please enter a valid refund amount')
+      return
+    }
 
-    refund(amount, refundReason)
-    setRefundAmount('')
-    setRefundReason('')
+    if (amount > balance) {
+      alert('Refund amount cannot exceed current balance')
+      return
+    }
+
+    setIsProcessing(true)
+    try {
+      await refund(amount, refundReason || 'Manual refund')
+      setRefundAmount('')
+      setRefundReason('')
+      alert('Refund processed successfully!')
+    } catch (err) {
+      alert(err.message || 'Failed to process refund')
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
-  function handleCancelBooking() {
+  async function handleCancelBooking() {
     if (!cancelReason.trim()) {
       alert('Please enter a cancellation reason')
       return
     }
 
     if (selectedTransaction) {
-      cancelBooking(selectedTransaction.id, cancelReason)
+      setIsProcessing(true)
+      try {
+        await cancelBooking(selectedTransaction.id, cancelReason)
+        alert('Booking cancelled and refund processed successfully!')
+        setShowCancelModal(false)
+        setCancelReason('')
+        setSelectedTransaction(null)
+      } catch (err) {
+        alert(err.message || 'Failed to cancel booking')
+      } finally {
+        setIsProcessing(false)
+      }
     }
+  }
 
-    setShowCancelModal(false)
-    setCancelReason('')
-    setSelectedTransaction(null)
+  // Show loading while checking auth
+  if (isCheckingAuth || authLoading) {
+    return (
+      <div className="min-h-screen pt-24 pb-12 px-4 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent"></div>
+          <p className="mt-4 text-slate-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // If not authenticated, show nothing (will redirect)
+  if (!isAuthenticated) {
+    return null
+  }
+
+  // Show wallet loading state
+  if (loading && transactions.length === 0) {
+    return (
+      <div className="min-h-screen pt-24 pb-12 px-4 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent"></div>
+          <p className="mt-4 text-slate-600">Loading wallet data...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -218,6 +308,7 @@ export default function Wallet() {
                                 setSelectedTransaction(tx)
                                 setShowCancelModal(true)
                               }}
+                              disabled={isProcessing}
                               className="
                                 px-3 py-1.5
                                 rounded-lg
@@ -229,6 +320,8 @@ export default function Wallet() {
                                 border-red-200
                                 hover:bg-red-100
                                 transition
+                                disabled:opacity-50
+                                disabled:cursor-not-allowed
                               "
                             >
                               Cancel Booking
@@ -281,6 +374,7 @@ export default function Wallet() {
                       setCustomTopUp('')
                     }}
                     className={`rounded-xl border p-3 text-left transition-all ${selectedAmount === amount && !customTopUp ? 'border-slate-900 bg-slate-900 text-white shadow-md shadow-slate-900/10' : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'}`}
+                    disabled={isProcessing}
                   >
                     <p className="text-sm font-bold">Rs. {amount}</p>
                     <p className={`text-[10px] mt-0.5 ${selectedAmount === amount && !customTopUp ? 'text-slate-300' : 'text-slate-400'}`}>Instant Load</p>
@@ -306,6 +400,7 @@ export default function Wallet() {
                     }}
                     placeholder="Enter Custom Value"
                     className="w-full bg-transparent px-3 py-2.5 text-sm text-slate-800 outline-none"
+                    disabled={isProcessing}
                   />
                 </div>
               </div>
@@ -313,7 +408,8 @@ export default function Wallet() {
               <button
                 type="button"
                 onClick={handleTopUp}
-                className="mt-5 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-3 text-sm font-semibold text-white transition shadow-sm shadow-emerald-600/10 flex items-center justify-center gap-2"
+                disabled={isProcessing}
+                className="mt-5 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-3 text-sm font-semibold text-white transition shadow-sm shadow-emerald-600/10 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span>Authorize Top-Up · Rs. {customTopUp || selectedAmount}</span>
               </button>
@@ -340,6 +436,7 @@ export default function Wallet() {
                       onChange={event => setRefundAmount(event.target.value.replace(/[^0-9]/g, ''))}
                       placeholder="e.g. 1000"
                       className="w-full bg-transparent px-3 py-2.5 text-sm text-slate-800 outline-none"
+                      disabled={isProcessing}
                     />
                   </div>
                 </div>
@@ -352,13 +449,15 @@ export default function Wallet() {
                     onChange={event => setRefundReason(event.target.value)}
                     placeholder="e.g. Booking Cancellation"
                     className="mt-2 w-full rounded-lg border border-slate-200 shadow-2xs px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all bg-white"
+                    disabled={isProcessing}
                   />
                 </div>
 
                 <button
                   type="button"
                   onClick={handleRefund}
-                  className="w-full rounded-xl bg-slate-900 hover:bg-slate-800 px-4 py-3 text-sm font-semibold text-white transition shadow-sm flex items-center justify-center gap-2"
+                  disabled={isProcessing}
+                  className="w-full rounded-xl bg-slate-900 hover:bg-slate-800 px-4 py-3 text-sm font-semibold text-white transition shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                   <span>Credit Verified Refund</span>
@@ -384,6 +483,7 @@ export default function Wallet() {
         </main>
       </div>
 
+      {/* Cancel Booking Modal */}
       {showCancelModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl">
@@ -404,6 +504,7 @@ export default function Wallet() {
                 placeholder="Type cancellation reason..."
                 rows={4}
                 className="w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/10"
+                disabled={isProcessing}
               />
             </div>
 
@@ -412,26 +513,26 @@ export default function Wallet() {
                 onClick={() => {
                   setShowCancelModal(false)
                   setCancelReason('')
+                  setSelectedTransaction(null)
                 }}
                 className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"
+                disabled={isProcessing}
               >
                 Close
               </button>
 
               <button
                 onClick={handleCancelBooking}
-                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
+                disabled={isProcessing}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Confirm Cancellation
+                {isProcessing ? 'Processing...' : 'Confirm Cancellation'}
               </button>
             </div>
 
           </div>
         </div>
       )}
-
-
-
     </div>
   )
 }
