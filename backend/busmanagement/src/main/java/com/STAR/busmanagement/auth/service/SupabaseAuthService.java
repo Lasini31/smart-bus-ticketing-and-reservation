@@ -37,6 +37,7 @@ public class SupabaseAuthService implements AuthService{
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("apikey", API_KEY);
+        headers.set("apikey", API_KEY);
 
         Map<String, String> body = Map.of(
                 "email", request.getUsername(),
@@ -84,11 +85,16 @@ public class SupabaseAuthService implements AuthService{
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     headers.set("apikey", API_KEY);
+    headers.set("apikey", API_KEY);
 
     Map<String, Object> body = Map.of(
             "email", request.getEmail(),
             "password", request.getPassword(),
-            "data", Map.of("role", request.getRole()) 
+            "data", Map.of(
+                    "role", request.getRole(),
+                    "name", request.getName() != null ? request.getName() : "",
+                    "contact_no", request.getContact_no() != null ? request.getContact_no() : ""
+            )
     );
 
     HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
@@ -119,6 +125,7 @@ public class SupabaseAuthService implements AuthService{
     return AuthResponse.builder()
             .token(token)
             .role(request.getRole())
+            .role(request.getRole())
             .userId(userId)
             .build();
     }
@@ -129,7 +136,7 @@ public class SupabaseAuthService implements AuthService{
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.set("apikey", API_KEY                );
+    headers.set("apikey", API_KEY);
 
     Map<String, String> body = Map.of(
             "email", request.getEmail()
@@ -146,6 +153,7 @@ public class SupabaseAuthService implements AuthService{
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
+    headers.set("apikey", API_KEY);
     headers.set("apikey", API_KEY);
 
     Map<String, String> body = Map.of(
@@ -184,6 +192,7 @@ public class SupabaseAuthService implements AuthService{
     String url = SUPABASE_URL + "/auth/v1/logout";
 
     HttpHeaders headers = new HttpHeaders();
+    headers.set("apikey", API_KEY);
     headers.set("apikey", API_KEY);
     headers.set("Authorization", "Bearer " + token);
 
