@@ -3,6 +3,7 @@ import { useMemo, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useWallet } from '../contexts/WalletContext.jsx'
 import { useAuth } from '../contexts/AuthContext.jsx'
+import { useLanguage } from '../contexts/LanguageContext.jsx'
 
 const TOP_UP_OPTIONS = [500, 1000, 2000, 5000]
 
@@ -23,6 +24,7 @@ export default function Wallet() {
     loading: authLoading,
     user
   } = useAuth()
+  const { messages } = useLanguage()
   const navigate = useNavigate()
 
   const [selectedAmount, setSelectedAmount] = useState(1000)
@@ -158,7 +160,7 @@ export default function Wallet() {
       <div className="min-h-screen pt-24 pb-12 px-4 flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"></div>
-          <p className="mt-4 text-gray-600">Loading wallet data...</p>
+          <p className="mt-4 text-gray-600">{messages.common.loading}</p>
         </div>
       </div>
     )
@@ -176,13 +178,13 @@ export default function Wallet() {
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
                 Active Account
               </span>
-              <h1 className="mt-3 text-3xl font-bold tracking-tight text-gray-900">My Digital Wallet</h1>
+              <h1 className="mt-3 text-3xl font-bold tracking-tight text-gray-900">{messages.wallet.overview}</h1>
               <p className="mt-2 text-sm text-gray-500 max-w-xl">
-                Manage balances, configure secure top-ups, and keep track of your direct ticket bookings natively.
+                {messages.wallet.available}
               </p>
             </div>
             <div className="rounded-xl bg-white text-gray-800 p-6 shadow-md border border-gray-200 min-w-[280px]">
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Available Balance</p>
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{messages.wallet.totalBalance}</p>
               <p className="mt-2 text-3xl font-bold tracking-tight text-green-600">Rs. {availableSpending}</p>
               <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
                 <span>Secure Gateway Active</span>
@@ -205,7 +207,7 @@ export default function Wallet() {
               <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Balance Breakdown</h2>
               <div className="mt-4 grid gap-4 sm:grid-cols-3">
                 <div className="rounded-xl bg-gray-50 p-4 border border-gray-100">
-                  <p className="text-xs font-medium text-gray-500">Net Wallet Value</p>
+                  <p className="text-xs font-medium text-gray-500">{messages.wallet.currentBalance}</p>
                   <p className="mt-1.5 text-xl font-bold text-gray-800">Rs. {balance.toFixed(2)}</p>
                 </div>
                 <div className="rounded-xl bg-gray-50 p-4 border border-gray-100">
@@ -213,7 +215,7 @@ export default function Wallet() {
                   <p className="mt-1.5 text-xl font-bold text-red-600">Rs. {spentThisMonth.toFixed(2)}</p>
                 </div>
                 <div className="rounded-xl bg-gray-50 p-4 border border-gray-100">
-                  <p className="text-xs font-medium text-gray-500">Last Registered Top-Up</p>
+                  <p className="text-xs font-medium text-gray-500">{messages.wallet.lastTopUp}</p>
                   <p className="mt-1.5 text-xl font-bold text-green-600">Rs. {lastTopUp}</p>
                 </div>
               </div>
@@ -356,7 +358,7 @@ export default function Wallet() {
             {/* SECURE TOP UP MODULE */}
             <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
               <div className="flex items-center justify-between">
-                <h2 className="text-base font-bold text-gray-900">Secure Top-Up</h2>
+                <h2 className="text-base font-bold text-gray-900">{messages.wallet.topUp}</h2>
                 <div className="flex items-center gap-1 text-xs text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded">
                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
                   <span>256-Bit SSL</span>
@@ -413,14 +415,14 @@ export default function Wallet() {
                 disabled={isProcessing}
                 className="mt-5 w-full rounded-xl bg-green-600 hover:bg-green-700 px-4 py-3 text-sm font-semibold text-white transition shadow-sm shadow-green-600/10 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span>Authorize Top-Up · Rs. {customTopUp || selectedAmount}</span>
+                <span>{messages.wallet.topUpButton} · Rs. {customTopUp || selectedAmount}</span>
               </button>
             </div>
 
             {/* ENHANCED SECURE REFUND FLOW */}
             <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
               <div className="flex items-center justify-between">
-                <h2 className="text-base font-bold text-gray-900">Refund Processing</h2>
+                <h2 className="text-base font-bold text-gray-900">{messages.wallet.refund}</h2>
                 <div className="flex items-center gap-1 text-xs text-gray-500 font-medium bg-gray-100 px-2 py-0.5 rounded">
                   <span>Protected</span>
                 </div>
@@ -467,7 +469,7 @@ export default function Wallet() {
                   className="w-full rounded-xl bg-green-600 hover:bg-green-700 px-4 py-3 text-sm font-semibold text-white transition shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-                  <span>Credit Verified Refund</span>
+                  <span>{messages.wallet.refundButton}</span>
                 </button>
               </div>
             </div>
