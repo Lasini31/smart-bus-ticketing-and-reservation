@@ -1,11 +1,13 @@
-package com.STAR.busmanagement.analytics.service;
+package com.STAR.busmanagement.owner.analytics.service;
 
-import com.STAR.busmanagement.analytics.dto.AnalyticsSummaryDTO;
-import com.STAR.busmanagement.analytics.dto.BookingTrendDTO;
-import com.STAR.busmanagement.analytics.dto.BusIncomeDTO;
-import com.STAR.busmanagement.analytics.dto.RoutePopularityDTO;
-import com.STAR.busmanagement.analytics.repository.AnalyticsRepository;
 import org.springframework.stereotype.Service;
+
+import com.STAR.busmanagement.owner.analytics.dto.AnalyticsSummaryDTO;
+import com.STAR.busmanagement.owner.analytics.dto.BookingTrendDTO;
+import com.STAR.busmanagement.owner.analytics.dto.BusIncomeDTO;
+import com.STAR.busmanagement.owner.analytics.dto.RoutePopularityDTO;
+import com.STAR.busmanagement.owner.analytics.repository.AnalyticsRepository;
+
 import java.util.List;
 
 @Service

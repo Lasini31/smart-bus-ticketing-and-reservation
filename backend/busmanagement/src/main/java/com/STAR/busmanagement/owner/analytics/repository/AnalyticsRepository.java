@@ -1,10 +1,12 @@
-package com.STAR.busmanagement.analytics.repository;
+package com.STAR.busmanagement.owner.analytics.repository;
 
-import com.STAR.busmanagement.analytics.dto.BookingTrendDTO;
-import com.STAR.busmanagement.analytics.dto.BusIncomeDTO;
-import com.STAR.busmanagement.analytics.dto.RoutePopularityDTO;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+
+import com.STAR.busmanagement.owner.analytics.dto.BookingTrendDTO;
+import com.STAR.busmanagement.owner.analytics.dto.BusIncomeDTO;
+import com.STAR.busmanagement.owner.analytics.dto.RoutePopularityDTO;
+
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.STAR.busmanagement.analytics.dto;
+package com.STAR.busmanagement.owner.analytics.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

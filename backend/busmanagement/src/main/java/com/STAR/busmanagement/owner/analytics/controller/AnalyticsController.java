@@ -1,12 +1,14 @@
-package com.STAR.busmanagement.analytics.controller;
+package com.STAR.busmanagement.owner.analytics.controller;
 
-import com.STAR.busmanagement.analytics.dto.AnalyticsSummaryDTO;
-import com.STAR.busmanagement.analytics.dto.BookingTrendDTO;
-import com.STAR.busmanagement.analytics.dto.BusIncomeDTO;
-import com.STAR.busmanagement.analytics.dto.RoutePopularityDTO;
-import com.STAR.busmanagement.analytics.service.AnalyticsService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.STAR.busmanagement.owner.analytics.dto.AnalyticsSummaryDTO;
+import com.STAR.busmanagement.owner.analytics.dto.BookingTrendDTO;
+import com.STAR.busmanagement.owner.analytics.dto.BusIncomeDTO;
+import com.STAR.busmanagement.owner.analytics.dto.RoutePopularityDTO;
+import com.STAR.busmanagement.owner.analytics.service.AnalyticsService;
+
 import java.util.List;
 
 @RestController
