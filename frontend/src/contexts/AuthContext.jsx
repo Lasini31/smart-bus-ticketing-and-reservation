@@ -27,12 +27,20 @@ export function AuthProvider({ children }) {
     const response = await fetch(`${API_BASE}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ username: email, password })
     })
+    
     if (!response.ok) {
-      const errorText = await response.text()
-      throw new Error(errorText || 'Unable to login')
+      let errorMessage = 'Unable to login'
+      try {
+        const errorData = await response.json()
+        errorMessage = errorData.error?.message || errorData.message || errorMessage
+      } catch {
+        errorMessage = `Login failed (${response.status}). Please check your credentials.`
+      }
+      throw new Error(errorMessage)
     }
+    
     const result = await response.json()
     const payload = {
       name: result.name || email,
