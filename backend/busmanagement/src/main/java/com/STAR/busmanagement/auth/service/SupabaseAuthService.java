@@ -29,8 +29,8 @@ public class SupabaseAuthService implements AuthService{
         headers.set("apikey", API_KEY);
 
         Map<String, String> body = Map.of(
-                "email", request.getUsername(),
-                "password", request.getPassword()
+                "email", request.getEmail(),
+                "password", request.getLicenseNumber()
         );
 
         HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);

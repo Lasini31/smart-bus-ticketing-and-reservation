@@ -8,12 +8,9 @@ public class DriverProfileResponse {
     private String id;
     private String phone;
     private String email;
-    private String address;
     private String licenseNumber;
-    private String experience;
-    private Double rating;
-    private Integer totalTrips;
     private String busNo;
     private String busTurn;
     private String schedule;
+    private Integer totalTrips;
 }

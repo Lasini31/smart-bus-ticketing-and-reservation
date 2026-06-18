@@ -52,8 +52,8 @@ public class DriverService {
         }
         Map<String, Object> profile = profileRows.get(0);
 
-        // 2. Get license number from driver_details table
-        String detailsUrl = supabaseUrl + "/rest/v1/driver_details"
+        // 2. Get license number from driver_table
+        String detailsUrl = supabaseUrl + "/rest/v1/driver_table"
                 + "?driver_id=eq." + driverId
                 + "&select=license_no";
 
@@ -82,13 +82,11 @@ public class DriverService {
 
         List<Map<String, Object>> busRows = busResp.getBody();
         String busNo = "N/A";
-        String busId = null;
         String routeId = null;
 
         if (busRows != null && !busRows.isEmpty()) {
             Map<String, Object> bus = busRows.get(0);
             busNo = (String) bus.get("plate_no");
-            busId = (String) bus.get("id");
             routeId = (String) bus.get("route_id");
         }
 
@@ -133,21 +131,64 @@ public class DriverService {
             schedule = "Start: " + shift.get("shift_start") + " | End: " + shift.get("shift_end");
         }
 
+        // 6. Get total completed trips (arrival_at in the past) for this driver
+        int totalTrips = countCompletedTrips(driverId);
+
         // Build response
         DriverProfileResponse dto = new DriverProfileResponse();
         dto.setName((String) profile.get("name"));
         dto.setId(driverId);
         dto.setPhone((String) profile.get("contact_no"));
         dto.setEmail((String) profile.get("email"));
-        dto.setAddress("N/A");       // not in schema
         dto.setLicenseNumber(licenseNo);
-        dto.setExperience("N/A");    // not in schema
-        dto.setRating(0.0);          // not in schema
-        dto.setTotalTrips(0);        // not in schema
         dto.setBusNo(busNo);
         dto.setBusTurn(routeName);
         dto.setSchedule(schedule);
+        dto.setTotalTrips(totalTrips);
         return dto;
+    }
+
+    // ----------------------------------------------------------------
+    // Counts trips for a driver whose arrival_at has already passed,
+    // used as a proxy for "completed trips" since the trips table has
+    // no explicit status column.
+    // ----------------------------------------------------------------
+    private int countCompletedTrips(String driverId) {
+        String nowIso = Instant.now().toString();
+
+        String countUrl = supabaseUrl + "/rest/v1/trips"
+                + "?driver_id=eq." + driverId
+                + "&arrival_at=lt." + nowIso
+                + "&select=id"
+                + "&limit=1";
+
+        HttpHeaders headers = buildHeaders();
+        headers.set("Prefer", "count=exact");
+
+        ResponseEntity<List<Map<String, Object>>> resp = restTemplate.exchange(
+                countUrl,
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                new ParameterizedTypeReference<>() {}
+        );
+
+        // PostgREST returns the exact count in the Content-Range response header,
+        // e.g. "Content-Range: 0-9/42" — the total is the value after the slash.
+        String contentRange = resp.getHeaders().getFirst("Content-Range");
+        if (contentRange != null && contentRange.contains("/")) {
+            String totalPart = contentRange.substring(contentRange.indexOf('/') + 1);
+            if (!totalPart.equals("*")) {
+                try {
+                    return Integer.parseInt(totalPart);
+                } catch (NumberFormatException ignored) {
+                    // fall through to body-based fallback
+                }
+            }
+        }
+
+        // Fallback: count rows returned in the body if the header wasn't usable
+        List<Map<String, Object>> rows = resp.getBody();
+        return rows != null ? rows.size() : 0;
     }
 
     // ----------------------------------------------------------------
