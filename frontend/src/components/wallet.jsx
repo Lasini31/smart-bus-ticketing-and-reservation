@@ -7,21 +7,21 @@ import { useAuth } from '../contexts/AuthContext.jsx'
 const TOP_UP_OPTIONS = [500, 1000, 2000, 5000]
 
 export default function Wallet() {
-  const { 
-    balance, 
-    transactions, 
-    refund, 
-    cancelBooking, 
-    loading, 
+  const {
+    balance,
+    transactions,
+    refund,
+    cancelBooking,
+    loading,
     error,
-    refreshWallet 
+    refreshWallet
   } = useWallet()
-  const { 
-    isAuthenticated, 
-    userId, 
+  const {
+    isAuthenticated,
+    userId,
     token,
     loading: authLoading,
-    user 
+    user
   } = useAuth()
   const navigate = useNavigate()
 
@@ -140,8 +140,8 @@ export default function Wallet() {
     return (
       <div className="min-h-screen pt-24 pb-12 px-4 flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent"></div>
-          <p className="mt-4 text-slate-600">Loading...</p>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
     )
@@ -157,8 +157,8 @@ export default function Wallet() {
     return (
       <div className="min-h-screen pt-24 pb-12 px-4 flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent"></div>
-          <p className="mt-4 text-slate-600">Loading wallet data...</p>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"></div>
+          <p className="mt-4 text-gray-600">Loading wallet data...</p>
         </div>
       </div>
     )
@@ -167,7 +167,7 @@ export default function Wallet() {
   return (
     <div className="min-h-screen bg-gray-50 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto flex flex-col gap-6">
-        
+
         {/* FIXED POSITION OVERVIEW HEADER */}
         <header className="rounded-2xl bg-white p-6 lg:p-8 shadow-sm border border-gray-100">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
@@ -187,7 +187,7 @@ export default function Wallet() {
               <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
                 <span>Secure Gateway Active</span>
                 <svg className="w-3.5 h-3.5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944a11.954 11.954 0 007.834 3.056c.11.653.166 1.322.166 2.00 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.678.056-1.347.166-2zm9.834 4.001a1 1 0 10-2 0v3a1 1 0 102 0v-3z" clipRule="evenodd"/>
+                  <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944a11.954 11.954 0 007.834 3.056c.11.653.166 1.322.166 2.00 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.678.056-1.347.166-2zm9.834 4.001a1 1 0 10-2 0v3a1 1 0 102 0v-3z" clipRule="evenodd" />
                 </svg>
               </div>
             </div>
@@ -196,10 +196,10 @@ export default function Wallet() {
 
         {/* MAIN DASHBOARD CONTAINER */}
         <main className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr] items-start">
-          
+
           {/* LEFT SECTION: FIXED METRICS & SEPARATELY SCROLLABLE HISTORY */}
           <div className="space-y-6">
-            
+
             {/* FIXED METRICS BAR */}
             <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
               <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Balance Breakdown</h2>
@@ -250,16 +250,16 @@ export default function Wallet() {
                   </div>
                 ) : (
                   visibleTransactions.map(tx => (
-                    <div 
-                      key={tx.id} 
+                    <div
+                      key={tx.id}
                       className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-white p-4 sm:flex-row sm:items-center sm:justify-between hover:border-gray-200 transition-colors shadow-2xs"
                     >
                       <div className="flex items-center gap-3.5">
                         <div className={`p-2.5 rounded-xl ${tx.amount >= 0 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
                           {tx.amount >= 0 ? (
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 4.5l-15 15m0 0h11.25m-11.25 0V8.25"/></svg>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 4.5l-15 15m0 0h11.25m-11.25 0V8.25" /></svg>
                           ) : (
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/></svg>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" /></svg>
                           )}
                         </div>
                         <div>
@@ -276,18 +276,18 @@ export default function Wallet() {
                           tx.label.toLowerCase().includes('ticket') ||
                           tx.label.toLowerCase().includes('booking')
                         ) && (
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${tx.status === 'Completed' ? 'bg-gray-100 text-gray-700' : 'bg-amber-50 text-amber-700'}`}>
-                            {tx.status}
-                          </span>
-                        )}
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${tx.status === 'Completed' ? 'bg-gray-100 text-gray-700' : 'bg-amber-50 text-amber-700'}`}>
+                              {tx.status}
+                            </span>
+                          )}
                         {(
                           tx.label.toLowerCase().includes('bus') ||
                           tx.label.toLowerCase().includes('ticket') ||
                           tx.label.toLowerCase().includes('booking')
                         ) && (
-                          tx.status === 'Cancelled' ? (
-                            <span
-                              className="
+                            tx.status === 'Cancelled' ? (
+                              <span
+                                className="
                                 px-3 py-1.5
                                 rounded-lg
                                 text-xs
@@ -298,18 +298,18 @@ export default function Wallet() {
                                 border-gray-200
                                 cursor-not-allowed
                               "
-                            >
-                              Booking Cancelled
-                            </span>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedTransaction(tx)
-                                setShowCancelModal(true)
-                              }}
-                              disabled={isProcessing}
-                              className="
+                              >
+                                Booking Cancelled
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedTransaction(tx)
+                                  setShowCancelModal(true)
+                                }}
+                                disabled={isProcessing}
+                                className="
                                 px-3 py-1.5
                                 rounded-lg
                                 text-xs
@@ -323,11 +323,11 @@ export default function Wallet() {
                                 disabled:opacity-50
                                 disabled:cursor-not-allowed
                               "
-                            >
-                              Cancel Booking
-                            </button>
-                          )
-                        )}
+                              >
+                                Cancel Booking
+                              </button>
+                            )
+                          )}
                       </div>
                     </div>
                   ))
@@ -342,7 +342,7 @@ export default function Wallet() {
                       className="w-full py-3 rounded-xl border border-dashed border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50 text-sm font-semibold text-gray-600 hover:text-gray-800 transition-all flex items-center justify-center gap-1.5 shadow-2xs"
                     >
                       <span>Load More History</span>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
                     </button>
                   </div>
                 )}
@@ -352,13 +352,13 @@ export default function Wallet() {
 
           {/* RIGHT SIDEBAR: COMPLETELY FIXED ON DESKTOP VIEWPORTS */}
           <aside className="lg:sticky lg:top-24 space-y-6">
-            
+
             {/* SECURE TOP UP MODULE */}
             <div className="rounded-2xl bg-white p-6 shadow-sm border border-gray-100">
               <div className="flex items-center justify-between">
                 <h2 className="text-base font-bold text-gray-900">Secure Top-Up</h2>
                 <div className="flex items-center gap-1 text-xs text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded">
-                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
                   <span>256-Bit SSL</span>
                 </div>
               </div>
@@ -373,7 +373,7 @@ export default function Wallet() {
                       setSelectedAmount(amount)
                       setCustomTopUp('')
                     }}
-                    className={`rounded-xl border p-3 text-left transition-all ${selectedAmount === amount && !customTopUp ? 'border-slate-900 bg-slate-900 text-white shadow-md shadow-slate-900/10' : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'}`}
+                    className={`rounded-xl border p-3 text-left transition-all ${selectedAmount === amount ? 'border-green-600 bg-green-600 text-white shadow-md shadow-green-600/10' : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'}`}
                     disabled={isProcessing}
                   >
                     <p className="text-sm font-bold">Rs. {amount}</p>
@@ -401,7 +401,7 @@ export default function Wallet() {
                       }
                     }}
                     placeholder="Enter Custom Value"
-                    className="w-full bg-transparent px-3 py-2.5 text-sm text-slate-800 outline-none"
+                    className="w-full bg-transparent px-3 py-2.5 text-sm text-gray-800 outline-none"
                     disabled={isProcessing}
                   />
                 </div>
@@ -411,7 +411,7 @@ export default function Wallet() {
                 type="button"
                 onClick={handleTopUp}
                 disabled={isProcessing}
-                className="mt-5 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-3 text-sm font-semibold text-white transition shadow-sm shadow-emerald-600/10 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="mt-5 w-full rounded-xl bg-green-600 hover:bg-green-700 px-4 py-3 text-sm font-semibold text-white transition shadow-sm shadow-green-600/10 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span>Authorize Top-Up · Rs. {customTopUp || selectedAmount}</span>
               </button>
@@ -442,7 +442,7 @@ export default function Wallet() {
                         }
                       }}
                       placeholder="e.g. 1000"
-                      className="w-full bg-transparent px-3 py-2.5 text-sm text-slate-800 outline-none"
+                      className="w-full bg-transparent px-3 py-2.5 text-sm text-gray-800 outline-none"
                       disabled={isProcessing}
                     />
                   </div>
@@ -455,7 +455,7 @@ export default function Wallet() {
                     value={refundReason}
                     onChange={event => setRefundReason(event.target.value)}
                     placeholder="e.g. Booking Cancellation"
-                    className="mt-2 w-full rounded-lg border border-slate-200 shadow-2xs px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all bg-white"
+                    className="mt-2 w-full rounded-lg border border-gray-200 shadow-2xs px-3 py-2.5 text-sm text-gray-800 outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/10 transition-all bg-white"
                     disabled={isProcessing}
                   />
                 </div>
@@ -464,9 +464,9 @@ export default function Wallet() {
                   type="button"
                   onClick={handleRefund}
                   disabled={isProcessing}
-                  className="w-full rounded-xl bg-slate-900 hover:bg-slate-800 px-4 py-3 text-sm font-semibold text-white transition shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full rounded-xl bg-green-600 hover:bg-green-700 px-4 py-3 text-sm font-semibold text-white transition shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
                   <span>Credit Verified Refund</span>
                 </button>
               </div>
@@ -510,7 +510,7 @@ export default function Wallet() {
                 onChange={(e) => setCancelReason(e.target.value)}
                 placeholder="Type cancellation reason..."
                 rows={4}
-                className="w-full rounded-xl border border-slate-200 p-3 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/10"
+                className="w-full rounded-xl border border-gray-200 p-3 text-sm outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/10"
                 disabled={isProcessing}
               />
             </div>
@@ -522,7 +522,7 @@ export default function Wallet() {
                   setCancelReason('')
                   setSelectedTransaction(null)
                 }}
-                className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"
+                className="px-4 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
                 disabled={isProcessing}
               >
                 Close
