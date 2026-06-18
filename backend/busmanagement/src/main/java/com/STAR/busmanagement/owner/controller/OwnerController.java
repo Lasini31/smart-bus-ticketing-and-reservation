@@ -4,6 +4,7 @@ import com.STAR.busmanagement.owner.dto.*;
 import com.STAR.busmanagement.owner.service.OwnerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -42,9 +43,21 @@ public class OwnerController {
 
     // POST /owner/drivers — Add a new driver
     @PostMapping("/drivers")
-    public ResponseEntity<DriverResponse> addDriver(@RequestBody AddDriverRequest request) {
-        DriverResponse response = ownerService.addDriver(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<?> addDriver(@RequestBody AddDriverRequest request, Authentication authentication) {
+        try {
+            if (authentication == null || authentication.getName() == null || authentication.getName().isBlank()) {
+                throw new IllegalArgumentException("Owner session is required");
+            }
+
+            DriverResponse response = ownerService.addDriver(request, authentication.getName());
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(MessageResponse.builder().success(false).message(e.getMessage()).build());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(MessageResponse.builder().success(false).message(e.getMessage()).build());
+        }
     }
 
     // DELETE /owner/drivers/{id} — Remove a driver
