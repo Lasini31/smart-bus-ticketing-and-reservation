@@ -1,13 +1,23 @@
 package com.STAR.busmanagement.owner.service;
 
-import com.STAR.busmanagement.owner.dto.*;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.context.annotation.Primary;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.context.annotation.Primary;
 
-import java.util.Map;
+import com.STAR.busmanagement.owner.dto.AddBusRequest;
+import com.STAR.busmanagement.owner.dto.AddDriverRequest;
+import com.STAR.busmanagement.owner.dto.AssignDriverRequest;
+import com.STAR.busmanagement.owner.dto.DriverResponse;
+import com.STAR.busmanagement.owner.dto.MessageResponse;
+import com.STAR.busmanagement.owner.dto.OwnerAnalyticsResponse;
 
 @Primary
 @Service
@@ -74,17 +84,60 @@ public class SupabaseOwnerService implements OwnerService {
     // ADD DRIVER
     @Override
     public DriverResponse addDriver(AddDriverRequest request) {
-        String url = supabaseUrl + "/rest/v1/drivers";
 
-        Map<String, Object> body = Map.of(
-                "license", request.getLicenseNo(),
-                "status", "Active",
-                "employed_by", 1
+        // STEP 1 - Insert into profiles table
+        String profileUrl = supabaseUrl + "/rest/v1/profiles";
+
+        Map<String, Object> profileBody = Map.of(
+                "role", "driver",
+                "name", request.getName(),
+                "contact_no", request.getContactNumber(),
+                "email", request.getEmail(),
+                "status", "active"
         );
 
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, getHeaders());
-        restTemplate.exchange(url, HttpMethod.POST, entity, Object.class);
+        HttpEntity<Map<String, Object>> profileEntity
+                = new HttpEntity<>(profileBody, getHeaders());
 
+        ResponseEntity<Map[]> profileResponse
+                = restTemplate.exchange(
+                        profileUrl,
+                        HttpMethod.POST,
+                        profileEntity,
+                        Map[].class
+                );
+
+        Map[] profileData = profileResponse.getBody();
+
+        if (profileData == null || profileData.length == 0) {
+            throw new RuntimeException("Failed to create driver profile");
+        }
+
+        String driverId = profileData[0].get("id").toString();
+
+        // STEP 2 - Insert into driver_details table
+        String driverDetailsUrl = supabaseUrl + "/rest/v1/driver_details";
+
+        // TODO: Replace with actual logged-in owner's UUID
+        String employerId = "OWNER_UUID_HERE";
+
+        Map<String, Object> driverDetailsBody = Map.of(
+                "driver_id", driverId,
+                "employer_id", employerId,
+                "license_no", request.getLicenseNo()
+        );
+
+        HttpEntity<Map<String, Object>> driverDetailsEntity
+                = new HttpEntity<>(driverDetailsBody, getHeaders());
+
+        restTemplate.exchange(
+                driverDetailsUrl,
+                HttpMethod.POST,
+                driverDetailsEntity,
+                Object.class
+        );
+
+        // STEP 3 - Return response
         return DriverResponse.builder()
                 .name(request.getName())
                 .email(request.getEmail())
@@ -97,15 +150,44 @@ public class SupabaseOwnerService implements OwnerService {
     // REMOVE DRIVER
     @Override
     public MessageResponse removeDriver(String driverId) {
-        String url = supabaseUrl + "/rest/v1/drivers?driver_id=eq." + driverId;
 
-        HttpEntity<Void> entity = new HttpEntity<>(getHeaders());
-        restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);
+        try {
 
-        return MessageResponse.builder()
-                .success(true)
-                .message("Driver " + driverId + " removed successfully.")
-                .build();
+            HttpEntity<Void> entity
+                    = new HttpEntity<>(getHeaders());
+
+            String driverDetailsUrl
+                    = supabaseUrl + "/rest/v1/driver_details?driver_id=eq." + driverId;
+
+            restTemplate.exchange(
+                    driverDetailsUrl,
+                    HttpMethod.DELETE,
+                    entity,
+                    Void.class
+            );
+
+            String profileUrl
+                    = supabaseUrl + "/rest/v1/profiles?id=eq." + driverId;
+
+            restTemplate.exchange(
+                    profileUrl,
+                    HttpMethod.DELETE,
+                    entity,
+                    Void.class
+            );
+
+            return MessageResponse.builder()
+                    .success(true)
+                    .message("Driver removed successfully.")
+                    .build();
+
+        } catch (Exception e) {
+
+            return MessageResponse.builder()
+                    .success(false)
+                    .message("Failed to remove driver: " + e.getMessage())
+                    .build();
+        }
     }
 
     // ASSIGN DRIVER TO BUS
