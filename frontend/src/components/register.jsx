@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; 
+import { useAuth } from '../contexts/AuthContext.jsx'; // Import useAuth
 
 export default function Register() {
   // --- STATE VARIABLES ---
@@ -17,7 +18,8 @@ export default function Register() {
   const [passwordScore, setPasswordScore] = useState(0);
   const [fieldErrors, setFieldErrors] = useState({});
 
-  const navigate = useNavigate(); // Initialize the navigation tool
+  const navigate = useNavigate();
+  const { login } = useAuth(); // Get login function from AuthContext
 
   // --- GOOGLE SIGN UP HANDLER ---
   const handleGoogleSignUp = () => {
@@ -82,15 +84,18 @@ export default function Register() {
     }
 
     // --- PREPARE DATA FOR BACKEND ---
-const userData = {
-  email: email,
-  password: password,
-  role: role
-};
+    const userData = {
+      name: name,
+      email: email,
+      password: password,
+      contactNumber: phone, // Using 'contactNumber' as per API contract
+      role: role
+    };
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8081/auth/register', {
+      // First, register the user
+      const registerResponse = await fetch('http://localhost:8081/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -98,24 +103,46 @@ const userData = {
         body: JSON.stringify(userData),
       });
 
-      const data = await response.json();
+      const registerData = await registerResponse.json();
 
-      if (response.ok) {
-        // clear sensitive fields
+      if (!registerResponse.ok) {
+        setErrorMessage(registerData.message || registerData.error?.message || "Registration failed. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      // Registration successful - now auto-login
+      try {
+        // Call the login function from AuthContext
+        await login({ 
+          email: email, 
+          password: password 
+        });
+
+        // Clear sensitive fields
         setPassword('');
         setConfirmPassword('');
-        // If owner, redirect to bus setup
+
+        // Navigate based on role
         if (role === 'owner') {
-          navigate('/owner/bus-setup');  
+          navigate('/owner/bus-setup');
         } else {
-          navigate('/'); //////////////////////////////////////////////////////////
+          navigate('/');
         }
-      } else {
-        setErrorMessage(data.message || "Registration failed. Please try again.");
+      } catch (loginError) {
+        // If login fails, redirect to login page
+        console.error('Auto-login failed:', loginError);
+        setErrorMessage('Account created! Please login manually.');
+        navigate('/login', { 
+          state: { 
+            message: 'Account created successfully! Please login.',
+            email: email 
+          } 
+        });
       }
 
     } catch (error) {
-      console.log("Failed to connect to backend", error);
+      console.error("Registration error:", error);
       setErrorMessage("Server error. Please make sure the backend is running.");
     } finally {
       setLoading(false);
