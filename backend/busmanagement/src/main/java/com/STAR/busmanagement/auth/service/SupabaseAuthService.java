@@ -1,12 +1,22 @@
 package com.STAR.busmanagement.auth.service;
 
-import com.STAR.busmanagement.auth.dto.*;
-import org.springframework.http.*;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.beans.factory.annotation.Value;
-
 import java.util.Map;
+
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
+
+import com.STAR.busmanagement.auth.dto.AuthResponse;
+import com.STAR.busmanagement.auth.dto.ForgotPasswordRequest;
+import com.STAR.busmanagement.auth.dto.GoogleLoginRequest;
+import com.STAR.busmanagement.auth.dto.LoginRequest;
+import com.STAR.busmanagement.auth.dto.RegisterRequest;
 
 @Service
 public class SupabaseAuthService implements AuthService{
@@ -35,29 +45,36 @@ public class SupabaseAuthService implements AuthService{
 
         HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
 
-        ResponseEntity<Map> response =
-                restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
+        try {
+            ResponseEntity<Map> response =
+                    restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
 
-        Map<String, Object> resp = response.getBody();
+            Map<String, Object> resp = response.getBody();
 
-        String token = (String) resp.get("access_token");
+            String token = (String) resp.get("access_token");
 
-        // Extract user info
-        Map<String, Object> user = (Map<String, Object>) resp.get("user");
+            // Extract user info
+            Map<String, Object> user = (Map<String, Object>) resp.get("user");
 
-        String userId = (String) user.get("id");
+            String userId = (String) user.get("id");
 
-        Map<String, Object> metadata = (Map<String, Object>) user.get("app_metadata");
+            Map<String, Object> metadata = (Map<String, Object>) user.get("app_metadata");
 
-        String role = (metadata != null && metadata.get("role") != null)
-                ? metadata.get("role").toString()
-                : "passenger";
+            String role = (metadata != null && metadata.get("role") != null)
+                    ? metadata.get("role").toString()
+                    : "passenger";
 
-        return AuthResponse.builder()
-                .token(token)
-                .role(role)
-                .userId(userId)
-                .build();
+            return AuthResponse.builder()
+                    .token(token)
+                    .role(role)
+                    .userId(userId)
+                    .build();
+        } catch (HttpClientErrorException ex) {
+            if (ex.getStatusCode() == HttpStatus.BAD_REQUEST || ex.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+                throw new com.STAR.busmanagement.exception.InvalidCredentialsException();
+            }
+            throw new RuntimeException("Authentication failed: " + ex.getStatusCode());
+        }
     }
 
     public AuthResponse register(RegisterRequest request) {
