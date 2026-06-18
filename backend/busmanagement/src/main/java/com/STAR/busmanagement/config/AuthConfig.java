@@ -13,6 +13,7 @@ public class AuthConfig {
     //This acts as a runtime flag to determine which implementation to inject (Dependency injection)
 
     @Bean
+    @Primary
     public AuthService authService(
             MockAuthService mockService,
             SupabaseAuthService realService

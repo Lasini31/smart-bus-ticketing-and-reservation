@@ -2,10 +2,10 @@ package com.STAR.busmanagement.owner.service;
 
 import com.STAR.busmanagement.owner.dto.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.context.annotation.Primary;
 
 import java.util.Map;
 
@@ -13,14 +13,11 @@ import java.util.Map;
 @Service
 public class SupabaseOwnerService implements OwnerService {
 
-    @Value("${env.VITE_SUPABASE_URL}")
+    @Value("${supabase.url}")
     private String supabaseUrl;
 
-    @Value("${env.VITE_SUPABASE_PUBLISHABLE_KEY}")
+    @Value("${supabase.key}")
     private String serviceKey;
-
-    @Value("${env.VITE_API_BASE}")
-    private String apiKey;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -35,7 +32,6 @@ public class SupabaseOwnerService implements OwnerService {
         return headers;
     }
 
-    // ADD BUS
     @Override
     public MessageResponse addBus(AddBusRequest request) {
         String url = supabaseUrl + "/rest/v1/buses";
@@ -57,7 +53,6 @@ public class SupabaseOwnerService implements OwnerService {
                 .build();
     }
 
-    // REMOVE BUS
     @Override
     public MessageResponse removeBus(String busNo) {
         String url = supabaseUrl + "/rest/v1/buses?plate_no=eq." + busNo;
@@ -71,7 +66,6 @@ public class SupabaseOwnerService implements OwnerService {
                 .build();
     }
 
-    // ADD DRIVER
     @Override
     public DriverResponse addDriver(AddDriverRequest request) {
         String url = supabaseUrl + "/rest/v1/drivers";
@@ -94,7 +88,6 @@ public class SupabaseOwnerService implements OwnerService {
                 .build();
     }
 
-    // REMOVE DRIVER
     @Override
     public MessageResponse removeDriver(String driverId) {
         String url = supabaseUrl + "/rest/v1/drivers?driver_id=eq." + driverId;
@@ -108,14 +101,11 @@ public class SupabaseOwnerService implements OwnerService {
                 .build();
     }
 
-    // ASSIGN DRIVER TO BUS
     @Override
     public MessageResponse assignDriver(String busNo, AssignDriverRequest request) {
         String url = supabaseUrl + "/rest/v1/drivers?driver_id=eq." + request.getDriverId();
 
-        Map<String, Object> body = Map.of(
-                "assigned_bus", busNo
-        );
+        Map<String, Object> body = Map.of("assigned_bus", busNo);
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, getHeaders());
         restTemplate.exchange(url, HttpMethod.PATCH, entity, Object.class);
@@ -126,7 +116,6 @@ public class SupabaseOwnerService implements OwnerService {
                 .build();
     }
 
-    // GET ANALYTICS
     @Override
     public OwnerAnalyticsResponse getAnalytics() {
         String busUrl = supabaseUrl + "/rest/v1/buses?select=count";
