@@ -31,6 +31,13 @@ export default function TicketSearch({ onSearch }) {
   const [toSuggestions, setToSuggestions] = useState([]);
   const [showFromSuggestions, setShowFromSuggestions] = useState(false);
   const [showToSuggestions, setShowToSuggestions] = useState(false);
+  const sriLankaToday = () => {
+    const now = new Date();
+    const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+    const istMs = utcMs + (5 * 60 + 30) * 60000;
+    return new Date(istMs).toISOString().split('T')[0];
+  };
+  const today = sriLankaToday();
 
   const handleSearch = (updatedTravelers = travelers) => {
     onSearch({
@@ -124,24 +131,24 @@ export default function TicketSearch({ onSearch }) {
 
   return (
     <div className="mb-8">
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col gap-4">
         
         {/* Section 1: Select Locations */}
-        <div className="flex-1 bg-white shadow-lg pl-6 pr-6 pt-2 pb-2 rounded-lg">
-          <div className="flex flex-col md:flex-row items-end gap-3">
+        <div className="bg-white shadow-lg p-4 rounded-lg">
+          <div className="flex flex-col gap-3 md:flex-row md:items-end">
             {/* From Location */}
-            <div className="flex-1 w-full md:w-auto">
+            <div className="flex-1 min-w-0">
               <div className="relative">
                 <label className="block text-xs font-semibold text-gray-600 mb-2 uppercase">{messages.search?.from || 'From'}</label>
-                <div className="flex items-center border-b-2 border-gray-300 pb-2">
-                  <img src={getOnBus} className='w-8 h-8 mr-2'/>
+                <div className="flex min-w-0 items-center border-b-2 border-gray-300 pb-2">
+                  <img src={getOnBus} className='w-8 h-8 mr-2 flex-shrink-0'/>
                   <input
                     type="text"
                     value={from}
                     onChange={(e) => handleFromChange(e.target.value)}
                     onFocus={() => from.length > 0 && setShowFromSuggestions(true)}
                     placeholder={messages.search?.placeholderFrom || 'Select location'}
-                    className="w-full outline-none text-sm font-medium"
+                    className="min-w-0 flex-1 outline-none text-sm font-medium"
                     autoComplete="off"
                   />
                 </div>
@@ -173,18 +180,18 @@ export default function TicketSearch({ onSearch }) {
             </button>
 
             {/* To Location */}
-            <div className="flex-1 w-full md:w-auto">
+            <div className="flex-1 min-w-0">
               <div className="relative">
                 <label className="block text-xs font-semibold text-gray-600 mb-2 uppercase">{messages.search?.to || 'To'}</label>
-                <div className="flex items-center border-b-2 border-gray-300 pb-2">
-                  <img src={getOutBus} className='w-8 h-8 mr-2'/>
+                <div className="flex min-w-0 items-center border-b-2 border-gray-300 pb-2">
+                  <img src={getOutBus} className='w-8 h-8 mr-2 flex-shrink-0'/>
                   <input
                     type="text"
                     value={to}
                     onChange={(e) => handleToChange(e.target.value)}
                     onFocus={() => to.length > 0 && setShowToSuggestions(true)}
                     placeholder={messages.search?.placeholderTo || 'Select location'}
-                    className="w-full outline-none text-sm font-medium"
+                    className="min-w-0 flex-1 outline-none text-sm font-medium"
                     autoComplete="off"
                   />
                 </div>
@@ -206,70 +213,73 @@ export default function TicketSearch({ onSearch }) {
           </div>
         </div>
 
-        {/* Section 2: Select Date */}
-        <div className="flex-1 bg-white shadow-lg pl-6 pr-6 pt-2 pb-2 rounded-lg">
-          <label className="block text-xs font-semibold text-gray-600 mb-3 uppercase">{messages.search?.date || 'Select Date'}</label>
-          <div className="flex items-center border-b-2 border-gray-300 pb-2">
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => {
-                setStartDate(e.target.value);
-                handleSearch();
-              }}
-              className="w-full outline-none text-sm font-medium"
-            />
+        <div className="grid gap-4 md:grid-cols-2">
+          {/* Section 2: Select Date */}
+          <div className="bg-white shadow-lg p-4 rounded-lg">
+            <label className="block text-xs font-semibold text-gray-600 mb-3 uppercase">{messages.search?.date || 'Select Date'}</label>
+            <div className="flex min-w-0 items-center border-b-2 border-gray-300 pb-2">
+              <input
+                type="date"
+                value={startDate}
+                min={today}
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                  handleSearch();
+                }}
+                className="min-w-0 w-full outline-none text-sm font-medium"
+              />
+            </div>
           </div>
-        </div>
 
-        {/* Section 3: Set Travelers */}
-        <div className="flex-1 bg-white shadow-lg pl-6 pr-6 pt-2 pb-2 rounded-lg">
-          <label className="block text-xs font-semibold text-gray-600 mb-3 uppercase">{messages.search?.travelers || 'Number of Travelers'}</label>
-          <div className="flex items-center gap-4 pb-2 ">
-            <input
-              type="number"
-              value={travelers}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value === '') {
-                  setTravelers('');
-                  return;
-                }
-                if (isNaN(value)) return;
-                const newTravelers = Math.min(10, Math.max(1, parseInt(value)));
-                setTravelers(newTravelers);
-                handleSearch(newTravelers);
-              }}
-              onBlur={() => {
-                if (travelers === '' || travelers < 1) {
-                  setTravelers(1);
-                  handleSearch(1);
-                }
-              }}
-              className="w-35 text-center outline-none font-bold text-lg border-b-2 border-gray-300"
-              min="1"
-              max="10"
-            />
-            <button
-              onClick={() => {
-                const newTravelers = Math.max(1, travelers - 1);
-                setTravelers(newTravelers);
-                handleSearch(newTravelers);
-              }}
-              className="flex-shrink-0 bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold w-10 h-10 rounded-full flex items-center justify-center transition text-lg"
-            >
-              −
-            </button>
-            <button
-              onClick={() => {
-                const newTravelers = Math.min(10, travelers + 1);
-                setTravelers(newTravelers);
-                handleSearch(newTravelers);
-              }}
-              className="flex-shrink-0 bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold w-10 h-10 rounded-full flex items-center justify-center transition text-lg"
-            >
-              +
-            </button>
+          {/* Section 3: Set Travelers */}
+          <div className="bg-white shadow-lg p-4 rounded-lg">
+            <label className="block text-xs font-semibold text-gray-600 mb-3 uppercase">{messages.search?.travelers || 'Number of Travelers'}</label>
+            <div className="flex flex-wrap items-center gap-3 pb-2">
+              <input
+                type="number"
+                value={travelers}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '') {
+                    setTravelers('');
+                    return;
+                  }
+                  if (isNaN(value)) return;
+                  const newTravelers = Math.min(10, Math.max(1, parseInt(value)));
+                  setTravelers(newTravelers);
+                  handleSearch(newTravelers);
+                }}
+                onBlur={() => {
+                  if (travelers === '' || travelers < 1) {
+                    setTravelers(1);
+                    handleSearch(1);
+                  }
+                }}
+                className="w-20 min-w-[80px] text-center outline-none font-bold text-lg border-b-2 border-gray-300"
+                min="1"
+                max="10"
+              />
+              <button
+                onClick={() => {
+                  const newTravelers = Math.max(1, travelers - 1);
+                  setTravelers(newTravelers);
+                  handleSearch(newTravelers);
+                }}
+                className="flex-shrink-0 bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold w-10 h-10 rounded-full flex items-center justify-center transition text-lg"
+              >
+                −
+              </button>
+              <button
+                onClick={() => {
+                  const newTravelers = Math.min(10, travelers + 1);
+                  setTravelers(newTravelers);
+                  handleSearch(newTravelers);
+                }}
+                className="flex-shrink-0 bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold w-10 h-10 rounded-full flex items-center justify-center transition text-lg"
+              >
+                +
+              </button>
+            </div>
           </div>
         </div>
 

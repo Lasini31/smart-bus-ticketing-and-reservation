@@ -1,19 +1,75 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useWallet } from '../contexts/WalletContext.jsx';
+import { useAuth } from '../contexts/AuthContext.jsx';
 
 export default function SeatSelection() {
   const { state } = useLocation();
   const navigate = useNavigate();
   const { balance, deduct } = useWallet();
   const ticket = state?.ticket;
-  const initialTravelers = state?.travelers ?? 0;
+  const initialTravelers = 0;
+  const { token } = useAuth();
+
+  const [driver, setDriver] = useState(null);
+  const [driverLoading, setDriverLoading] = useState(false);
+  const [driverError, setDriverError] = useState(null);
 
   useEffect(() => {
     if (!ticket) {
       navigate('/booking');
     }
   }, [ticket, navigate]);
+
+  useEffect(() => {
+    // Fetch driver details from backend when ticket (busNo) is available
+    if (!ticket) return;
+    const fetchDriver = async () => {
+      setDriverLoading(true);
+      setDriverError(null);
+      try {
+        const API_BASE = import.meta.env.VITE_API_BASE || 'https://api.busmanagement.internal/v1';
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+        // 1) Get bus info to obtain driverId (BusResponse.driverId)
+        const busRes = await fetch(`${API_BASE}/buses/${ticket.id}`, { headers });
+        if (!busRes.ok) {
+          throw new Error(`Failed to fetch bus info (${busRes.status})`);
+        }
+        const bus = await busRes.json();
+        const driverId = bus?.driverId;
+
+        // If backend already supplies driverName/driverPhone on the bus response, use those
+        if (bus?.driverName || bus?.driverPhone) {
+          setDriver({ driverProfile: bus.driverName, contactNumber: bus.driverPhone });
+          return;
+        }
+
+        if (!driverId) {
+          setDriver(null);
+          return;
+        }
+
+        // 2) Fallback: Get driver profile (DriverController GET /driver/{id})
+        const drvRes = await fetch(`${API_BASE}/driver/${driverId}`, { headers });
+        if (!drvRes.ok) {
+          // don't throw - just record and fallback to ticket fields
+          setDriverError(`Driver details unavailable (${drvRes.status})`);
+          setDriver(null);
+          return;
+        }
+        const drv = await drvRes.json();
+        setDriver(drv);
+      } catch (err) {
+        setDriverError(err.message || String(err));
+        setDriver(null);
+      } finally {
+        setDriverLoading(false);
+      }
+    };
+
+    fetchDriver();
+  }, [ticket, token]);
 
   if (!ticket) return null;
 
@@ -28,7 +84,7 @@ export default function SeatSelection() {
     const maxSelectable = Math.min(ticket.seatsAvailable, totalSeats - bookedSeats.length);
     if (selectedSeats.includes(seat)) {
       setSelectedSeats(prev => prev.filter(s => s !== seat));
-      setNumTickets(prev => Math.max(0, prev - 1));
+      setNumTickets(prev => Math.max(0, selectedSeats.length - 1));
       return;
     }
     if (selectedSeats.length >= maxSelectable) {
@@ -36,7 +92,7 @@ export default function SeatSelection() {
       return;
     }
     setSelectedSeats(prev => [...prev, seat]);
-    setNumTickets(prev => prev + 1);
+    setNumTickets(prev => Math.max(prev, selectedSeats.length + 1));
   };
 
   const handleProceed = () => {
@@ -151,10 +207,11 @@ export default function SeatSelection() {
           <p className="text-sm text-gray-600 mb-1">Departure: <span className="font-semibold text-gray-800">{ticket.time}</span></p>
           <p className="text-sm text-gray-600 mb-1">ETA: <span className="font-semibold text-gray-800">{ticket.expectedArrivalTime || ticket.arrivalTime || '-'}</span></p>
           <div className="border-t border-gray-200 mt-3 pt-3">
-            <p className="text-sm text-gray-600">Driver: <span className="font-semibold text-gray-800">{ticket.driver}</span></p>
-            <p className="text-sm text-gray-600">Driver Phone: <span className="font-semibold text-gray-800">{ticket.driverPhone}</span></p>
-            <p className="text-sm text-gray-600">Conductor: <span className="font-semibold text-gray-800">{ticket.conductor}</span></p>
-            <p className="text-sm text-gray-600">Conductor Phone: <span className="font-semibold text-gray-800">{ticket.conductorPhone}</span></p>
+            <p className="text-sm text-gray-600">Driver: <span className="font-semibold text-gray-800">{driver ? (driver.driverProfile || driver.name) : (ticket.driver || 'N/A')}{driverLoading ? ' (loading...)' : ''}</span></p>
+            <p className="text-sm text-gray-600">Driver Phone: <span className="font-semibold text-gray-800">{driver ? (driver.contactNumber || ticket.driverPhone || '-') : (ticket.driverPhone || '-')}</span></p>
+            <p className="text-sm text-gray-600">Conductor: <span className="font-semibold text-gray-800">{ticket.conductor || 'N/A'}</span></p>
+            <p className="text-sm text-gray-600">Conductor Phone: <span className="font-semibold text-gray-800">{ticket.conductorPhone || '-'}</span></p>
+            {driverError && <p className="text-xs text-red-500 mt-2">{driverError}</p>}
           </div>
 
           <div className="mt-4">
