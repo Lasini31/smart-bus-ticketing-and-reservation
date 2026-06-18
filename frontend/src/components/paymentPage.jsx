@@ -46,12 +46,7 @@ export default function PaymentPage() {
 
     const walletBalance = balance
 
-    const handleAmountChange = (e) => {
-        const value = e.target.value
-        if (/^\d*\.?\d{0,2}$/.test(value)){
-            setAmount(value)
-        }
-    }
+    // Amount is now handled statically via wallet routing
 
     // const validate = () => {
     // const e = {};
@@ -201,19 +196,13 @@ export default function PaymentPage() {
                 </div>
                 </div>
 
-                {/* Top-up amount input */}
-                <div className="mb-8">
-                <label className="text-sm font-semibold text-gray-700">Top-up Amount (LKR)</label>
-                <input
-                    type="text"
-                    value={amount}
-                    onChange={handleAmountChange}
-                    placeholder="Enter amount (min. 100)"
-                    className="mt-1 w-full border border-gray-300 rounded-lg px-4 py-3
-                            focus:outline-none focus:ring-2 focus:ring-green-500 text-lg font-semibold"
-                />
-                {errors.amount && <p className="text-red-500 text-xs mt-1">{errors.amount}</p>}
-                <p className="text-xs text-gray-400 mt-1">Min: LKR 100 &nbsp;|&nbsp; Max: LKR 50,000</p>
+                {/* Top-up amount display */}
+                <div className="mb-8 bg-gray-50 border border-gray-200 rounded-lg px-4 py-4">
+                  <p className="text-sm font-semibold text-gray-500 mb-1">Top-up Amount</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    LKR {amount ? parseFloat(amount).toFixed(2) : '0.00'}
+                  </p>
+                  {errors.amount && <p className="text-red-500 text-xs mt-2">{errors.amount}</p>}
                 </div>
                         
                 <PersonalDetailsForm
