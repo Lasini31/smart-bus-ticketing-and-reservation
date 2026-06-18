@@ -8,9 +8,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
-import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
-import jakarta.servlet.http.HttpServletRequest;
 
 @Configuration
 public class SecurityConfig {
@@ -31,10 +28,6 @@ public class SecurityConfig {
             http
                     .authorizeHttpRequests(auth -> auth
                             .requestMatchers("/auth/**").permitAll()
-                            .requestMatchers("/users/**").permitAll()
-                            .requestMatchers("/routes/**").permitAll()
-                            .requestMatchers("/trips/**").permitAll()
-                            .requestMatchers("/bookings/**").permitAll()
                             .anyRequest().authenticated()
                     )
                     .oauth2ResourceServer(oauth -> oauth
