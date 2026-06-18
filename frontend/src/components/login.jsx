@@ -38,9 +38,13 @@ export default function Login() {
                 password: password.trim() 
             })
             
-            // If successful, navigate to home or previous page
-            const redirectTo = location.state?.from?.pathname || '/'
-            navigate(redirectTo)
+            // If successful, redirect based on role
+            if (result.role === 'owner') {
+                navigate('/owner/dashboard')
+            } else {
+                const redirectTo = location.state?.from?.pathname || '/'
+                navigate(redirectTo)
+            }
             
         } catch (err) {
             // Show error message from backend or generic message
