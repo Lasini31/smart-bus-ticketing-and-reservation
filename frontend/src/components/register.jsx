@@ -43,6 +43,10 @@ export default function Register() {
     // --- PREPARE DATA FOR BACKEND ---
     const userData = {
       role: role, 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5fc2a76536ca409ced53b2b3ed5a03b6e050648e
       username: username,
       password: password,
       phone: phone,
@@ -50,7 +54,11 @@ export default function Register() {
     };
 
     try {
+<<<<<<< HEAD
       const response = await fetch('http://localhost:5000/api/register', {
+=======
+      const response = await fetch('http://localhost:8081/api/register', {
+>>>>>>> 5fc2a76536ca409ced53b2b3ed5a03b6e050648e
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
