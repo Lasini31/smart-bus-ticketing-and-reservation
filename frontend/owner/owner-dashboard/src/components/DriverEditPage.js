@@ -6,29 +6,29 @@ function DriverEditPage({ driver, buses, onBack, onSave, onPay }) {
 
   const [formState, setFormState] = useState(() => ({
     name: driver?.name || '',
-    age: driver?.age || '',
     contactNo: driver?.contactNo || '',
-    driverId: driver?.driverId || '',
+    email: driver?.email || '',
     licenceNo: driver?.licenceNo || '',
+    password: driver?.password || '',
     assignedBusNo: driver?.assignedBusNo || '',
     totalDrivingHours: driver?.totalDrivingHours || '',
-    totalDistanceDriven: driver?.totalDistanceDriven || '',
     payableAmount: driver?.payableAmount ?? 0,
     paymentHistory: initialHistory,
+    driverId: driver?.driverId || '',
   }));
 
   useEffect(() => {
     setFormState({
       name: driver?.name || '',
-      age: driver?.age || '',
       contactNo: driver?.contactNo || '',
-      driverId: driver?.driverId || '',
+      email: driver?.email || '',
       licenceNo: driver?.licenceNo || '',
+      password: driver?.password || '',
       assignedBusNo: driver?.assignedBusNo || '',
       totalDrivingHours: driver?.totalDrivingHours || '',
-      totalDistanceDriven: driver?.totalDistanceDriven || '',
       payableAmount: driver?.payableAmount ?? 0,
       paymentHistory: driver?.paymentHistory || [],
+      driverId: driver?.driverId || '',
     });
   }, [driver]);
 
@@ -45,16 +45,16 @@ function DriverEditPage({ driver, buses, onBack, onSave, onPay }) {
     onSave({
       ...driver,
       name: formState.name,
-      age: formState.age,
       contactNo: formState.contactNo,
-      driverId: formState.driverId,
+      email: formState.email,
       licenceNo: formState.licenceNo,
+      password: formState.password,
       assignedBusNo: formState.assignedBusNo,
       totalDrivingHours: formState.totalDrivingHours,
-      totalDistanceDriven: formState.totalDistanceDriven,
       payableAmount: formState.payableAmount,
       paymentHistory: formState.paymentHistory,
       status: formState.payableAmount > 0 ? 'Due' : 'Paid',
+      driverId: formState.driverId,
     });
   };
 
@@ -86,18 +86,13 @@ function DriverEditPage({ driver, buses, onBack, onSave, onPay }) {
           </label>
 
           <label>
-            Age
-            <input name="age" value={formState.age} onChange={handleChange} />
-          </label>
-
-          <label>
             Contact No
             <input name="contactNo" value={formState.contactNo} onChange={handleChange} />
           </label>
 
           <label>
-            Driver ID
-            <input name="driverId" value={formState.driverId} onChange={handleChange} />
+            Email
+            <input name="email" type="email" value={formState.email} onChange={handleChange} />
           </label>
 
           <label>
@@ -105,43 +100,52 @@ function DriverEditPage({ driver, buses, onBack, onSave, onPay }) {
             <input name="licenceNo" value={formState.licenceNo} onChange={handleChange} />
           </label>
 
-          <label>
-            Assigned Bus No.
-            <select name="assignedBusNo" value={formState.assignedBusNo} onChange={handleChange}>
-              <option value="">Select bus</option>
-              {buses.map((bus) => (
-                <option key={bus.busNo} value={bus.busNo}>
-                  {bus.busNo}
-                </option>
-              ))}
-            </select>
-          </label>
+          {isNewDriver && (
+            <label>
+              Password
+              <input name="password" type="password" value={formState.password} onChange={handleChange} />
+            </label>
+          )}
 
-          <label>
-            Total Payable
-            <input
-              name="payableAmount"
-              type="number"
-              min="0"
-              value={formState.payableAmount}
-              onChange={handleChange}
-            />
-          </label>
+          {!isNewDriver && (
+            <>
+              <label>
+                Driver ID
+                <input name="driverId" value={formState.driverId} disabled />
+              </label>
+
+              <label>
+                Assigned Bus No.
+                <input name="assignedBusNo" value={formState.assignedBusNo} disabled />
+              </label>
+            </>
+          )}
+
+          {!isNewDriver && (
+            <label>
+              Total Payable
+              <input
+                name="payableAmount"
+                type="number"
+                min="0"
+                value={formState.payableAmount}
+                onChange={handleChange}
+              />
+            </label>
+          )}
         </div>
       </div>
 
-      <div className="driver-stats-card panel">
-        <div className="driver-stats-grid">
-          <div>
-            <span>Total Driving Hours</span>
-            <strong>{formState.totalDrivingHours}</strong>
-          </div>
-          <div>
-            <span>Total Distance Driven</span>
-            <strong>{formState.totalDistanceDriven}</strong>
+      {!isNewDriver && (
+        <div className="driver-stats-card panel">
+          <div className="driver-stats-grid">
+            <div>
+              <span>Total Driving Hours</span>
+              <strong>{formState.totalDrivingHours}</strong>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {!isNewDriver && (
         <div className="driver-payment-card panel">

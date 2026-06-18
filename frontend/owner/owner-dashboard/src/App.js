@@ -10,7 +10,7 @@ import DriverEditPage from './components/DriverEditPage';
 import { useMemo, useState } from 'react';
 
 const analyticsRows = [
-  { busNo: 'NA - 1334', routeNo: '177', percentage: 56 },
+  { busNo: 'NA - 1334', routeNo: '177', percentage: 150 },
   { busNo: 'NG - 4565', routeNo: '17', percentage: 25 },
   { busNo: 'NK - 5656', routeNo: '256', percentage: 85 },
 ];
@@ -20,24 +20,21 @@ const buses = [
     busNo: 'NA - 1334',
     routeNo: '177',
     assignedDriver: 'Theekshana D',
-    seatCapacity: '60 Seats',
-    seatTemplate: '/Bus-Seat-Template-1.png',
+    type: '/Bus-Seat-Template-1.png',
     targetIncome: 'Rs.350 000/=',
   },
   {
     busNo: 'NG - 4565',
     routeNo: '17',
     assignedDriver: 'Sandil R',
-    seatCapacity: '56 Seats',
-    seatTemplate: '/Bus-Seat-Template-2.png',
+    type: '/Bus-Seat-Template-2.png',
     targetIncome: 'Rs.280 000/=',
   },
   {
     busNo: 'NK - 5656',
     routeNo: '256',
     assignedDriver: 'Sandul R',
-    seatCapacity: '52 Seats',
-    seatTemplate: '/Bus-Seat-Template-3.png',
+    type: '/Bus-Seat-Template-3.png',
     targetIncome: 'Rs.320 000/=',
   },
 ];
@@ -45,14 +42,12 @@ const buses = [
 const drivers = [
   {
     name: 'Theekshana Kaushallya',
-    age: '45 Years',
     contactNo: '+94 75 755 6545',
     driverId: 'SRK15',
     licenceNo: '19568465213V',
     assignedBusNo: 'NA - 1334',
     status: 'Due',
     totalDrivingHours: '156hr',
-    totalDistanceDriven: '2050Km',
     payableAmount: 500000,
     paymentHistory: [
       { date: 'March', amount: 'Rs.250 000/=' },
@@ -62,14 +57,12 @@ const drivers = [
   },
   {
     name: 'Sandil R',
-    age: '39 Years',
     contactNo: '+94 77 111 2233',
     driverId: 'SRK17',
     licenceNo: '17568465211V',
     assignedBusNo: 'NG - 4565',
     status: 'Paid',
     totalDrivingHours: '122hr',
-    totalDistanceDriven: '1680Km',
     payableAmount: 0,
     paymentHistory: [
       { date: 'March', amount: 'Rs.250 000/=' },
@@ -79,14 +72,12 @@ const drivers = [
   },
   {
     name: 'Sandul R',
-    age: '41 Years',
     contactNo: '+94 76 888 5544',
     driverId: 'SRK20',
     licenceNo: '20568465210V',
     assignedBusNo: 'NK - 5656',
     status: 'Paid',
     totalDrivingHours: '138hr',
-    totalDistanceDriven: '1920Km',
     payableAmount: 0,
     paymentHistory: [
       { date: 'March', amount: 'Rs.250 000/=' },
@@ -307,3 +298,4 @@ function App() {
 }
 
 export default App;
+
