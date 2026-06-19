@@ -6,6 +6,17 @@ const API_BASE = import.meta.env.VITE_API_BASE || 'https://api.busmanagement.int
 
 const WalletContext = createContext(null);
 
+const parseJsonSafely = async (response) => {
+  const text = await response.text()
+  if (!text) return null
+  try {
+    return JSON.parse(text)
+  } catch (error) {
+    console.warn('Failed to parse JSON response:', error)
+    return null
+  }
+}
+
 export function WalletProvider({ children }) {
   const { user, token, userId, isAuthenticated } = useAuth();
   const [balance, setBalance] = useState(0);
@@ -44,11 +55,11 @@ export function WalletProvider({ children }) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || 'Failed to fetch wallet data');
+        const errorData = await parseJsonSafely(response);
+        throw new Error(errorData?.error?.message || 'Failed to fetch wallet data');
       }
 
-      const data = await response.json();
+      const data = await parseJsonSafely(response) || {};
       setBalance(data.balance);
       setWalletId(data.walletId);
 
@@ -133,11 +144,11 @@ export function WalletProvider({ children }) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || 'Top up failed');
+        const errorData = await parseJsonSafely(response);
+        throw new Error(errorData?.error?.message || 'Top up failed');
       }
 
-      const data = await response.json();
+      const data = await parseJsonSafely(response) || {};
       
       // Update balance from API response
       setBalance(data.balance);
@@ -197,11 +208,11 @@ export function WalletProvider({ children }) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || 'Payment failed');
+        const errorData = await parseJsonSafely(response);
+        throw new Error(errorData?.error?.message || 'Payment failed');
       }
 
-      const data = await response.json();
+      const data = await parseJsonSafely(response) || {};
       
       // Update balance from API response
       setBalance(data.balance);
@@ -257,11 +268,11 @@ export function WalletProvider({ children }) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || 'Refund failed');
+        const errorData = await parseJsonSafely(response);
+        throw new Error(errorData?.error?.message || 'Refund failed');
       }
 
-      const data = await response.json();
+      const data = await parseJsonSafely(response) || {};
       
       // Update balance from API response
       setBalance(data.balance);

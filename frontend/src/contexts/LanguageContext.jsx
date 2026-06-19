@@ -1,9 +1,17 @@
 import { createContext, useContext, useMemo, useState } from 'react'
 import { LANGUAGE_DATA } from '../data/languageData.js'
 
-const LanguageContext = createContext(null)
 const LANGUAGE_KEY = 'smart-bus-language'
 const AVAILABLE_LANGUAGES = ['EN', 'SI', 'TA']
+
+const defaultLanguageContext = {
+  language: 'EN',
+  setLanguage: () => {},
+  messages: LANGUAGE_DATA.EN,
+  availableLanguages: AVAILABLE_LANGUAGES
+}
+
+const LanguageContext = createContext(defaultLanguageContext)
 
 export function LanguageProvider({ children }) {
   const [language, setLanguageState] = useState(() => {
@@ -30,7 +38,7 @@ export function LanguageProvider({ children }) {
 export function useLanguage() {
   const context = useContext(LanguageContext)
   if (!context) {
-    throw new Error('useLanguage must be used within a LanguageProvider')
+    return defaultLanguageContext
   }
   return context
 }
