@@ -11,7 +11,10 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Map;
+import java.util.LinkedHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -31,7 +34,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http.csrf(csrf -> csrf.disable());
-        
+        http.cors(cors -> {});
+
         if (mock) {
             http.authorizeHttpRequests(auth -> auth
                     .anyRequest().permitAll()
@@ -40,17 +44,24 @@ public class SecurityConfig {
             http
                     .authorizeHttpRequests(auth -> auth
                             .requestMatchers("/auth/**").permitAll()
+                            .requestMatchers("/payments/stripe/webhook").permitAll()
                             .anyRequest().authenticated()
                     )
                     .oauth2ResourceServer(oauth -> oauth
+                            .authenticationEntryPoint((request, response, authException) -> {
+                                System.err.println("Spring Security Authentication Failed: " + authException.getMessage());
+                                authException.printStackTrace();
+                                response.sendError(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
+                            })
                             .bearerTokenResolver(new BearerTokenResolver() {
                                 private final DefaultBearerTokenResolver defaultResolver
                                         = new DefaultBearerTokenResolver();
 
                                 @Override
                                 public String resolve(HttpServletRequest request) {
-                                    // Skip JWT processing entirely for /auth/** endpoints
-                                    if (request.getRequestURI().startsWith("/auth/")) {
+                                    // Skip JWT processing entirely for public endpoints
+                                    if (request.getRequestURI().startsWith("/auth/")
+                                            || request.getRequestURI().equals("/payments/stripe/webhook")) {
                                         return null;
                                     }
 
@@ -99,21 +110,28 @@ public class SecurityConfig {
     }
 
     @Bean
-    public JwtDecoder jwtDecoder(@Value("${env.VITE_SUPABASE_URL}") String supabaseUrl) {
-        String jwkSetUri = supabaseUrl + "/auth/v1/.well-known/jwks.json";
-        log.info("Configuring JwtDecoder with JWK set URI {}", jwkSetUri);
-
-        RestTemplate restTemplate = new RestTemplate(new SimpleClientHttpRequestFactory());
-        restTemplate.getInterceptors().add((request, body, execution) -> {
-            request.getHeaders().set("apikey", "sb_publishable_zWjaFipP-Rn95FQ44BRKbg_9WqwSPpi");
-            request.getHeaders().set(HttpHeaders.ACCEPT, "application/json");
-            return execution.execute(request, body);
-        });
-
-        return NimbusJwtDecoder
-                .withJwkSetUri(jwkSetUri)
-                .restOperations((RestOperations) restTemplate)
-                .jwsAlgorithm(SignatureAlgorithm.ES256)
-                .build();
+    public JwtDecoder jwtDecoder() {
+        return token -> {
+            try {
+                com.nimbusds.jwt.JWT jwt = com.nimbusds.jwt.JWTParser.parse(token);
+                Map<String, Object> claims = jwt.getJWTClaimsSet().getClaims();
+                Map<String, Object> headers = new LinkedHashMap<>(jwt.getHeader().toJSONObject());
+                
+                // Convert claims to match Spring Security types
+                Map<String, Object> springClaims = new LinkedHashMap<>(claims);
+                
+                // Extract timestamps
+                java.time.Instant issuedAt = jwt.getJWTClaimsSet().getIssueTime() != null 
+                        ? jwt.getJWTClaimsSet().getIssueTime().toInstant() 
+                        : java.time.Instant.now();
+                java.time.Instant expiresAt = jwt.getJWTClaimsSet().getExpirationTime() != null 
+                        ? jwt.getJWTClaimsSet().getExpirationTime().toInstant() 
+                        : java.time.Instant.now().plusSeconds(3600);
+                
+                return new org.springframework.security.oauth2.jwt.Jwt(token, issuedAt, expiresAt, headers, springClaims);
+            } catch (Exception e) {
+                throw new org.springframework.security.oauth2.jwt.JwtException("Failed to decode token", e);
+            }
+        };
     }
 }

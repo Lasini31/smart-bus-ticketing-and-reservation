@@ -35,7 +35,11 @@ public class SupabaseOwnerService implements OwnerService {
     @Value("${env.VITE_API_BASE}")
     private String apiKey;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
+
+    public SupabaseOwnerService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     private HttpHeaders getHeaders() {
         HttpHeaders headers = new HttpHeaders();
