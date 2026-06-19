@@ -41,7 +41,7 @@ public class RouteController {
 
     private RouteResponse mapToResponse(Route route) {
         return RouteResponse.builder()
-                .id(route.getId())
+                .routeId(route.getId() != null ? route.getId().toString() : null)
                 .name(route.getName())
                 .startLocation(route.getStartLocation())
                 .endLocation(route.getEndLocation())

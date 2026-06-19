@@ -29,7 +29,7 @@ public class SupabaseOwnerService implements OwnerService {
     @Value("${env.VITE_SUPABASE_URL}")
     private String supabaseUrl;
 
-    @Value("${env.VITE_SUPABASE_PUBLISHABLE_KEY}")
+    @Value("${supabase.api-key}")
     private String serviceKey;
 
     @Value("${env.VITE_API_BASE}")

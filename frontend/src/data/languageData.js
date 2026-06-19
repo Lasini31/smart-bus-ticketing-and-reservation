@@ -110,39 +110,39 @@ export const LANGUAGE_DATA = {
   },
   SI: {
     header: {
-      booking: 'බුක් කිරීම',
-      wallet: 'පසුවා',
-      about: 'පිළිබඳ',
+      booking: 'ආසන වෙන්කරගැනීම',
+      wallet: 'මුදල් පසුම්බිය',
+      about: 'පිළිබඳව',
       login: 'ඇතුල් වන්න',
       register: 'ලියාපදිංචි වන්න',
-      ownerRegister: 'මුරැද register',
+      ownerRegister: 'හිමිකරු ලියාපදිංචිය',
       profile: 'පැතිකඩ',
       home: 'මුල් පිටුව',
-      contact: 'සන්නිවේදන',
-      support: 'උදවු'
+      contact: 'අමතන්න',
+      support: 'සහාය'
     },
     home: {
       heroTitle: 'සෑම ගමනකටම ස්මාර්ට් බස් ටිකට්',
       heroSubtitle: 'බස් සෙවීම, මුදල් පසුබැඳීම, ඇණවුම් කිරීම සහ ඩිජිටල් ටිකට් ලබා ගැනීම.',
       searchCta: 'බස් සෙවීමට යන්න',
-      feature1: 'වේගවත් කුටිය තෝරා ගැනීම',
+      feature1: 'වේගවත් ආසන තෝරා ගැනීම',
       feature2: 'ආරක්ෂිත මුදල් ටොප්-අප්',
-      feature3: 'ගමන් යාවත්කාලීන හා ටිකට් බාගත කිරීම',
+      feature3: 'ගමන් යාවත්කාලීන කිරීම සහ ටිකට් බාගත කිරීම',
       testimonialsTitle: 'පාරිභෝගික අදහස්',
       testimonialsSubtitle: 'දෛනිකව Smart Bus භාවිතා කරන ගමන්කරුවන්ගෙන් ලැබුණු අදහස්.',
       ownerCallout: 'බස් හිමියෙක්ද? ක්ෂණිකව ලියාපදිංචි වන්න.',
-      quickStart: 'වේගවත් සෙවුම, ආරක්ෂිත ගෙවීම්, තෙමසිභාෂා සහය.'
+      quickStart: 'වේගවත් සෙවුම, ආරක්ෂිත ගෙවීම්, ත්‍රිභාෂා සහය.'
     },
     search: {
-      from: 'සිදා සිට',
-      to: 'ගමන් ගම',
+      from: 'සිට',
+      to: 'ගමන් ගෙන',
       date: 'ගමන් දිනය',
       travelers: 'ගමන්කරුවන්',
       placeholderFrom: 'නගරය ඇතුළත් කරන්න',
       placeholderTo: 'ගමන්ගම ඇතුළත් කරන්න',
-      clear: 'පෙරහර ඉවත් කරන්න',
+      clear: 'පෙරහන් ඉවත් කරන්න',
       results: 'ලබා ගත හැකි බස්',
-      noResults: 'ඔබේ සෙවිමට බස් නොමැත.'
+      noResults: 'ඔබේ සෙවුමට බස් නොමැත.'
     },
     login: {
       title: 'ආයුබෝවන්',
@@ -156,7 +156,7 @@ export const LANGUAGE_DATA = {
     },
     register: {
       title: 'නව ගිණුමක් සාදන්න',
-      subtitle: 'කටුක ගිණුමක් සාදා ටිකට් ඇනවුම් කරන්න.',
+      subtitle: 'කටුක ගිණුමක් සාදා ටිකට් ඇණවුම් කරන්න.',
       name: 'පූර්ණ නම',
       email: 'ඊ-තැපැල් ලිපිනය',
       password: 'මුරපදය',
@@ -174,45 +174,45 @@ export const LANGUAGE_DATA = {
       passengerLink: 'සාමාන්‍ය ගිණුමකට ලියාපදිංචි වන්න'
     },
     wallet: {
-      overview: 'මුදල් පසුබැඳීම',
+      overview: 'සාරාංශය',
       totalBalance: 'මුළු ශේෂය',
-      topUp: 'පසුබැඳි ඔබේ පසුබැඳිය',
-      refund: 'ණය ඉල්ලීම',
+      topUp: 'ටොප්-අප්',
+      refund: 'ආපසු ඉල්ලුම',
       currentBalance: 'වර්තමාන ශේෂය',
       topUpButton: 'දැන් පසුවන්න',
-      refundButton: 'ණය ලබාදෙන්න',
+      refundButton: 'මුදල් ආපසු ලබාගන්න',
       lastTopUp: 'අවසන් පසුබැඳීම',
       available: 'ලබා ගත හැකි ශේෂය'
     },
     profile: {
       greeting: 'හෙලෝ,',
-      description: 'ඔබේ ඇණවුම්, wallets හා පිලිවෙල සකස් කරන්න.',
+      description: 'ඔබේ ඇණවුම්, ගිණුම් සහ පිළිවෙල සකස් කරන්න.',
       logout: 'පිටවීම',
-      goBooking: 'බුක් කිරීම වෙත පැමිණෙන්න'
+      goBooking: 'ආසන වෙන්කරගැනීම වෙත පැමිණෙන්න'
     },
     booking: {
-      title: 'ඔබේ බස් සොයන්න හා බුක් කරන්න',
-      subtitle: 'හොඳම මාර්ග තෝරන්න, කුටිය තෝරන්න හා ආරක්ෂිතව ගෙවන්න.',
+      title: 'ඔබේ බස් සොයන්න හා වෙන්කරගන්න',
+      subtitle: 'හොඳම මාර්ග තෝරන්න, කුටීර තෝරන්න හා ආරක්ෂිතව ගෙවන්න.',
       available: 'ලබා ගත හැකි බස්',
       noResults: 'ඔබේ සෙවුම සඳහා බස් නොමැත',
-      seatsAvailable: 'ලබාගත හැකි කුටිය'
+      seatsAvailable: 'ලබාගත හැකි කුටීර'
     },
     feedback: {
-      title: 'ගනුදෙනුකරුවන්ගේ ප්‍රතිචාර',
-      subtitle: 'ශ්‍රී ලංකාවේ දෛනික ආදරණීය ගමන්කරුවන්.'
+      title: 'පාරිභෝගික ප්‍රතිචාර',
+      subtitle: 'ශ්‍රී ලංකාවේ දෛනික ගමන්කරුවන්.'
     },
     footer: {
-      company: 'ස마트 බස්',
+      company: 'ස්මාර්ට් බස්',
       description: 'නවීන බස් ටිකට් සහ ආරක්ෂිත පද්ධතිය.',
-      contactTitle: 'සන්නිවේදන',
-      developerTitle: ' සංවර්ධකයා',
-      rights: 'ඉතිරි හිමිකම් හිමි.'
+      contactTitle: 'සම්බන්ධීකරණය',
+      developerTitle: 'සංවර්ධකයා',
+      rights: 'හිමිකම් තහවුරු කර ඇත.'
     },
     common: {
       loading: 'පූරණය වෙමින් පවතී...',
       emailInvalid: 'කරුණාකර සත්‍ය ඊ-තැපැල් ලිපිනයක් ඇතුළත් කරන්න',
       passwordRequired: 'මුරපදය අවශ්‍ය වේ',
-      nameRequired: 'මුළු නම අවශ්‍ය වේ',
+      nameRequired: 'පූර්ණ නම අවශ්‍ය වේ',
       amountRequired: 'අගය ඇතුලත් කරන්න',
       minTopUp: 'අවම පසුබැඳීම රු. 100 යි'
     }

@@ -1,14 +1,13 @@
 package com.STAR.busmanagement.route.dto;
 
 import lombok.*;
-import java.util.UUID;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class RouteResponse {
-    private UUID id;
+    private String routeId;   // API contract: GET /routes/{id} returns routeId
     private String name;
     private String startLocation;
     private String endLocation;
