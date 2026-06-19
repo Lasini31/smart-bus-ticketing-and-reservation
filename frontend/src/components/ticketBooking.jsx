@@ -1,12 +1,21 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext.jsx'
+import { useWallet } from '../contexts/WalletContext.jsx';
+import { useAuth } from '../contexts/AuthContext.jsx';
 import TicketSearch from './ticketSearch';
 import TicketCard from './ticketCard';
-import { SAMPLE_TICKETS } from './ticketSampleData';
 import topup from '../../public/icons/topup.png';
 
 export default function TicketBooking() {
+  const navigate = useNavigate()
   const { messages } = useLanguage()
+  const { balance } = useWallet()
+  const { token } = useAuth()
+  
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(false);
+  
   const [filters, setFilters] = useState({
     from: '',
     to: '',
@@ -14,9 +23,60 @@ export default function TicketBooking() {
     travelers: 1
   });
 
+  useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        setLoading(true);
+        const API_BASE = import.meta.env.VITE_API_BASE || 'https://api.busmanagement.internal/v1';
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        
+        // Comply with API_contract.md by fetching buses and routes
+        const [busesRes, routesRes] = await Promise.all([
+          fetch(`${API_BASE}/buses`, { headers }),
+          fetch(`${API_BASE}/routes`, { headers })
+        ]);
+
+        if (busesRes.ok && routesRes.ok) {
+          const buses = await busesRes.json();
+          const routes = await routesRes.json();
+          
+          if (Array.isArray(buses) && Array.isArray(routes) && buses.length > 0) {
+            const formattedTickets = buses.map(bus => {
+              const route = routes.find(r => r.routeId === bus.routeId) || {};
+              return {
+                id: bus.busNo,
+                from: route.startLocation || 'Unknown',
+                to: route.endLocation || 'Unknown',
+                date: new Date().toISOString().split('T')[0],
+                departureTime: bus.schedule || '08:00 AM',
+                arrivalTime: route.arrivalTime ? new Date(route.arrivalTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '12:00 PM',
+                busType: bus.seatTemplate === 'luxury' ? 'Luxury' : 'Normal',
+                price: 1000, // Fallback price
+                seatsAvailable: 40, // Fallback
+                operator: bus.driverId ? `Driver ${bus.driverId}` : 'Smart Bus Transport',
+                amenities: ['A/C', 'WiFi']
+              };
+            });
+            setTickets(formattedTickets);
+            return;
+          }
+        }
+        
+        // If API doesn't return expected data, clear tickets
+        setTickets([]);
+      } catch (err) {
+        console.error('Failed to fetch buses/routes from backend:', err);
+        setTickets([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTickets();
+  }, [token]);
+
   // Filter tickets based on search criteria
   const filteredTickets = useMemo(() => {
-    return SAMPLE_TICKETS.filter(ticket => {
+    return tickets.filter(ticket => {
       const fromMatch = !filters.from || ticket.from.includes(filters.from.toLowerCase());
       const toMatch = !filters.to || ticket.to.includes(filters.to.toLowerCase());
       return fromMatch && toMatch;
@@ -36,11 +96,14 @@ export default function TicketBooking() {
                 <p className="text-gray-600 text-sm">Wallet</p>
                 <div className="flex items-center gap-2">
                   <span className="text-gray-700 text-2xl font-semibold">Balance</span>
-                  <h2 className="text-2xl font-bold text-green-600 mr-4">Rs.5440.50</h2>
+                  <h2 className="text-2xl font-bold text-green-600 mr-4">Rs.{(balance || 0).toFixed(2)}</h2>
                 </div>
               </div>
-              <div className="flex flex-col items-center border-md hover:bg-gray-100 p-2 rounded-lg transition cursor-pointer">
-                <div className="bg-blue-100 p-2 rounded-lg mb-2">
+              <div 
+                className="flex flex-col items-center border-md hover:bg-gray-100 p-2 rounded-lg transition cursor-pointer text-green-700"
+                onClick={() => navigate('/wallet')}
+              >
+                <div className="bg-green-100 p-2 rounded-lg mb-2">
                   <img src={topup} alt="Top-up" className="w-10 h-10" />
                 </div>
                 <p className=" font-semibold text-sm">
@@ -64,7 +127,11 @@ export default function TicketBooking() {
 
         {/* Tickets List */}
         <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
-          {filteredTickets.length > 0 ? (
+          {loading ? (
+            <div className="col-span-full text-center py-8">
+              <p className="text-gray-500">Loading tickets...</p>
+            </div>
+          ) : filteredTickets.length > 0 ? (
             filteredTickets.map(ticket => {
               const canBook = filters.travelers <= ticket.seatsAvailable;
               return (

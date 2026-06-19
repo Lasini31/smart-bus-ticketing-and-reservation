@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; 
+import { useAuth } from '../contexts/AuthContext.jsx'; // Import useAuth
 
 export default function Register() {
   // --- STATE VARIABLES ---
@@ -11,11 +12,11 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  const navigate = useNavigate(); // Initialize the navigation tool
+  const navigate = useNavigate();
+  const { login } = useAuth(); // Get login function from AuthContext
 
-  // --- GOOGLE SIGN UP HANDLER ---
   const handleGoogleSignUp = () => {
-    setErrorMessage(''); 
+    setErrorMessage('');
 
     if (!role) {
       setErrorMessage("Please select a role before signing up with Google.");
@@ -27,8 +28,8 @@ export default function Register() {
 
   // --- SUBMIT FUNCTION FOR MANUAL SIGN UP ---
   const handleSubmit = async (event) => {
-    event.preventDefault(); 
-    setErrorMessage(''); 
+    event.preventDefault();
+    setErrorMessage('');
 
     if (!role) {
       setErrorMessage("Please select a role before signing up manually.");
@@ -40,17 +41,17 @@ export default function Register() {
       return; 
     }
 
-    // --- PREPARE DATA FOR BACKEND ---
     const userData = {
-      role: role, 
-      username: username,
+      name: name,
+      email: email,
       password: password,
-      phone: phone,
-      email: email
+      contactNumber: phone, // Using 'contactNumber' as per API contract
+      role: role
     };
 
     try {
-      const response = await fetch('http://localhost:5000/api/register', {
+      // First, register the user
+      const registerResponse = await fetch('http://localhost:8081/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -58,17 +59,45 @@ export default function Register() {
         body: JSON.stringify(userData),
       });
 
-      const data = await response.json();
-      
-      if (response.ok) {
-        // Teleport the user to the login page on success!
-        navigate('/login'); 
-      } else {
-        setErrorMessage(data.message || "Registration failed. Please try again.");
+      const registerData = await registerResponse.json();
+
+      if (!registerResponse.ok) {
+        setErrorMessage(registerData.message || registerData.error?.message || "Registration failed. Please try again.");
+        setLoading(false);
+        return;
       }
 
+      // Registration successful - now auto-login
+      try {
+        // Call the login function from AuthContext
+        await login({ 
+          email: email, 
+          password: password 
+        });
+
+        // Clear sensitive fields
+        setPassword('');
+        setConfirmPassword('');
+
+        // Navigate based on role
+        if (role === 'owner') {
+          navigate('/owner/bus-setup');
+        } else {
+          navigate('/');
+        }
+      } catch (loginError) {
+        // If login fails, redirect to login page
+        console.error('Auto-login failed:', loginError);
+        setErrorMessage('Account created! Please login manually.');
+        navigate('/login', { 
+          state: { 
+            message: 'Account created successfully! Please login.',
+            email: email 
+          } 
+        });
+      }
     } catch (error) {
-      console.log("Failed to connect to backend", error);
+      console.error("Registration error:", error);
       setErrorMessage("Server error. Please make sure the backend is running.");
     }
   };
@@ -78,9 +107,9 @@ export default function Register() {
       
       {/* Left Side: Bus Image */}
       <div className="hidden md:flex w-1/2 justify-center items-center p-12">
-        <img 
-          src="/bus.png" 
-          alt="White Bus" 
+        <img
+          src="/bus.png"
+          alt="Bus"
           className="w-full max-w-lg object-contain"
         />
       </div>
@@ -106,7 +135,7 @@ export default function Register() {
           </div>
 
           {/* Option 1 - Google Sign Up */}
-          <button 
+          {/* <button 
             type="button" 
             onClick={handleGoogleSignUp}
             className="w-full flex items-center justify-center space-x-3 py-2 px-4 border border-gray-300 rounded hover:bg-gray-50 transition-colors font-medium text-gray-700"
@@ -118,14 +147,14 @@ export default function Register() {
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
             </svg>
             <span>Sign up with Google</span>
-          </button>
+          </button> */}
 
-          {/* OR Divider */}
+          {/* OR Divider
           <div className="flex items-center my-6">
             <div className="flex-grow border-t border-green-200"></div>
             <span className="px-3 text-gray-400 text-xs font-bold tracking-wider">OR FILL MANUALLY</span>
             <div className="flex-grow border-t border-green-200"></div>
-          </div>
+          </div> */}
 
           {/* Option 2 - Manual Sign Up Form */}
           <form className="space-y-4" onSubmit={handleSubmit}>
@@ -162,10 +191,13 @@ export default function Register() {
               />
             </div>
 
+            {/* Phone */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-              <input 
-                type="tel" 
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Phone Number
+              </label>
+              <input
+                type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 required
@@ -173,10 +205,13 @@ export default function Register() {
               />
             </div>
 
+            {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input 
-                type="email" 
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email
+              </label>
+              <input
+                type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -186,7 +221,7 @@ export default function Register() {
 
             {/* Error Message Display */}
             {errorMessage && (
-              <div className="text-red-500 text-sm font-medium mt-2">
+              <div className="text-red-500 text-sm font-medium">
                 {errorMessage}
               </div>
             )}
@@ -200,8 +235,12 @@ export default function Register() {
 
           {/* Bottom Link */}
           <div className="text-center mt-6">
-            <p className="text-xs text-gray-600 font-medium">Already have an account?</p>
-            <a href="/login" className="text-xs text-green-500 hover:underline">Login</a>
+            <p className="text-xs text-gray-600 font-medium">
+              Already have an account?
+            </p>
+            <a href="/login" className="text-xs text-green-500 hover:underline">
+              Login
+            </a>
           </div>
           
         </div>
