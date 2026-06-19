@@ -2,15 +2,28 @@ server:
   port: 8081
 
 spring:
+  profiles:
+    active: local
   security:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: https://rpbufjokybeukqcdfumq.supabase.co/auth/v1/keys
+          jwk-set-uri: https://rpbufjokybeukqcdfumq.supabase.co/auth/v1/.well-known/jwks.json
+          
+
   datasource:
     url: jdbc:postgresql://db.rpbufjokybeukqcdfumq.supabase.co:5432/postgres
     username: postgres
     password: 9KMUZZV2cZ8J0HDS
+    
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      keepalive-time: 300000
+      connection-timeout: 30000
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -21,6 +34,10 @@ supabase:
   key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwYnVmam9reWJldWtxY2RmdW1xIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjA0NTYxOSwiZXhwIjoyMDkxNjIxNjE5fQ.bpg9LvWMmo2VFCgsF1GN4sSOexaQgN_THhQ1qULwi_o
 
 env:
+  VITE_SUPABASE_URL: https://rpbufjokybeukqcdfumq.supabase.co
+  VITE_SUPABASE_PUBLISHABLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwYnVmam9reWJldWtxY2RmdW1xIiwicm9sZSI6InNlcnZpY2Vfcm9sZV9rZXkiLCJpYXQiOjE3NzYwNDU2MTksImV4cCI6MjA5MTYyMTYxOX0.bpg9LvWMmo2VFCgsF1GN4sSOexaQgN_THhQ1qULwi_o
+  VITE_API_BASE: https://rpbufjokybeukqcdfumq.supabase.co
+
   SUPERBASE_URL: https://rpbufjokybeukqcdfumq.supabase.co
   SUPERBASE_API_KEY: sb_publishable_zWjaFipP-Rn95FQ44BRKbg_9WqwSPpi
   SUPERBASE_SERVICE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwYnVmam9reWJldWtxY2RmdW1xIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjA0NTYxOSwiZXhwIjoyMDkxNjIxNjE5fQ.bpg9LvWMmo2VFCgsF1GN4sSOexaQgN_THhQ1qULwi_o
@@ -28,3 +45,12 @@ env:
 app:
   auth:
     mock: false
+
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY:}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+  currency: lkr
+  success-url: ${STRIPE_SUCCESS_URL:http://localhost:5173/payment?stripe_status=success&session_id={CHECKOUT_SESSION_ID}}
+  cancel-url: ${STRIPE_CANCEL_URL:http://localhost:5173/payment?stripe_status=cancelled}
+  min-topup-amount: 100
+  max-topup-amount: 50000

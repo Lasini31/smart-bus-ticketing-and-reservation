@@ -243,12 +243,21 @@ export function WalletProvider({ children }) {
     }
   };
 
-  // Refund - POST /wallet/{id}/refund
-  const refund = async (amount, reason = '') => {
-    if (!userId || !token) {
-      throw new Error('Please login to process refunds');
-    }
+  const setBalanceFromServer = (newBalance, topUpAmount) => {
+    setBalance(Number(Number(newBalance).toFixed(2)))
+    setTransactions(prev => [
+      {
+        id: prev.length + 1,
+        label: 'Top-up via Stripe',
+        amount: Number(topUpAmount),
+        date: new Date().toISOString().slice(0, 10),
+        status: 'Completed'
+      },
+      ...prev
+    ])
+  }
 
+  const refund = async (amount, reason) => {
     if (amount <= 0) {
       throw new Error('Refund amount must be greater than 0');
     }
@@ -257,8 +266,6 @@ export function WalletProvider({ children }) {
       setLoading(true);
       setError(null);
 
-      // The contract shows refund endpoint without request body
-      // It processes refund based on system logic
       const response = await fetch(`${API_BASE}/wallet/${userId}/refund`, {
         method: 'POST',
         headers: {
@@ -278,7 +285,6 @@ export function WalletProvider({ children }) {
       setBalance(data.balance);
       saveBalanceToStorage(data.balance);
 
-      // Add transaction record
       const newTransaction = {
         id: `tx_${Date.now()}`,
         label: reason ? `Refund: ${reason}` : 'Refund',
@@ -301,7 +307,7 @@ export function WalletProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  };
+    };
 
   // Cancel booking - handles refund via API
   const cancelBooking = async (transactionId, reason) => {

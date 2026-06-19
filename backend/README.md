@@ -124,6 +124,101 @@ instructions on importing and running the API tests.
 
 ---
 
+## Stripe Wallet Top-up Backend
+
+The backend supports Stripe Checkout for passenger wallet top-ups.
+The frontend should not collect raw card numbers for this flow.
+Instead, it should ask the backend to create a Stripe Checkout
+Session, then redirect the passenger to the Stripe-hosted checkout
+page returned by the backend.
+
+### Required environment variables
+
+```bash
+STRIPE_SECRET_KEY=sk_test_your_key_here
+STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
+STRIPE_SUCCESS_URL=http://localhost:5173/payment?stripe_status=success&session_id={CHECKOUT_SESSION_ID}
+STRIPE_CANCEL_URL=http://localhost:5173/payment?stripe_status=cancelled
+```
+
+`STRIPE_SUCCESS_URL` and `STRIPE_CANCEL_URL` are optional because
+development defaults are already configured in `application.yml`.
+
+### Endpoints
+
+#### Create a wallet top-up Checkout Session
+
+```http
+POST /payments/topups/checkout-session
+Authorization: Bearer <passenger jwt>
+Content-Type: application/json
+
+{
+  "amount": 1200.00
+}
+```
+
+Success response:
+
+```json
+{
+  "paymentId": 1,
+  "checkoutSessionId": "cs_test_...",
+  "checkoutUrl": "https://checkout.stripe.com/c/pay/cs_test_...",
+  "amount": 1200.00,
+  "currency": "lkr",
+  "status": "pending"
+}
+```
+
+The frontend should redirect the passenger to `checkoutUrl`.
+
+#### Stripe webhook
+
+```http
+POST /payments/stripe/webhook
+Stripe-Signature: <stripe signature>
+```
+
+Stripe calls this endpoint after the hosted payment flow changes
+state. On a verified paid Checkout Session, the backend calls the
+Supabase `complete_stripe_topup` function, marks the top-up as
+completed, and credits the wallet exactly once.
+
+#### Check a top-up session
+
+```http
+GET /payments/topups/sessions/{checkoutSessionId}
+Authorization: Bearer <passenger jwt>
+```
+
+Returns the stored payment status and latest wallet balance for the
+logged-in passenger.
+
+### Database objects
+
+The migration `supabase/migrations/20260618150000_add_stripe_topup_payments.sql`
+adds:
+
+- `stripe_topup_payments`: stores pending, completed, failed, and
+  expired Stripe wallet top-ups.
+- `complete_stripe_topup(...)`: an atomic Supabase function that
+  prevents duplicate wallet credits when Stripe retries webhooks.
+
+### Frontend integration notes
+
+- Keep the amount field and min/max validation: LKR 100 to LKR 50,000.
+- Do not submit card number, expiry, or CVC to this backend.
+- Call `POST /payments/topups/checkout-session` with the passenger JWT.
+- Redirect the browser to the returned `checkoutUrl`.
+- After redirect back to the app, read `session_id` from the URL and
+  call `GET /payments/topups/sessions/{sessionId}` to show pending or
+  completed status.
+- The wallet balance should be fetched from the backend after payment,
+  not updated locally before webhook confirmation.
+
+---
+
 ## Mock Mode
 
 The app supports a mock mode for testing without Supabase.

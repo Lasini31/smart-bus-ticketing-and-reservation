@@ -377,9 +377,6 @@ export default function Home() {
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 shrink-0">
-              <a href="/owner-register" className="rounded-full bg-green-600 hover:bg-green-500 transition-colors px-6 py-3 text-white font-bold text-sm text-center">
-                Register as Operator
-              </a>
               <a href="/owner-info" className="rounded-full border border-slate-600 hover:border-slate-400 transition-colors px-6 py-3 text-slate-300 font-semibold text-sm text-center">
                 Learn more
               </a>

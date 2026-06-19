@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException;
 
+import com.STAR.busmanagement.payment.exception.PaymentException;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -39,8 +41,22 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(PaymentException.class)
+    public ResponseEntity<?> handlePaymentException(PaymentException ex) {
+        System.err.println("PaymentException caught: " + ex.getCode() + " - " + ex.getMessage());
+        ex.printStackTrace();
+        return ResponseEntity.status(ex.getStatus()).body(
+                Map.of("error", Map.of(
+                        "code", ex.getCode(),
+                        "message", ex.getMessage()
+                ))
+        );
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<?> handleRuntimeException(RuntimeException ex) {
+        System.err.println("RuntimeException caught: " + ex.getMessage());
+        ex.printStackTrace();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                 Map.of("error", Map.of(
                         "code", "SERVER_ERROR",
@@ -51,7 +67,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGeneric(Exception ex) {
-
+        System.err.println("Exception caught: " + ex.getMessage());
+        ex.printStackTrace();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                 Map.of("error", Map.of(
                         "code", "SERVER_ERROR",
