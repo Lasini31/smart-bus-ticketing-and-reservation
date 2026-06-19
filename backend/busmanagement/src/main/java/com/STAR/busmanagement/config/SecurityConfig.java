@@ -3,17 +3,29 @@ package com.STAR.busmanagement.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
 import java.util.LinkedHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class SecurityConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
 
     @Value("${app.auth.mock:false}")
     private boolean mock;
@@ -52,6 +64,39 @@ public class SecurityConfig {
                                             || request.getRequestURI().equals("/payments/stripe/webhook")) {
                                         return null;
                                     }
+
+                                    String authorization = request.getHeader("Authorization");
+                                    if (authorization == null) {
+                                        log.warn("No Authorization header on {} {}", request.getMethod(), request.getRequestURI());
+                                    } else {
+                                        log.info("Authorization header received for {} {}. Prefix={}",
+                                                request.getMethod(),
+                                                request.getRequestURI(),
+                                                authorization.length() >= 12 ? authorization.substring(0, 12) : authorization);
+                                    }
+
+                                    if (authorization != null) {
+                                        String token = authorization.trim();
+                                        if (token.regionMatches(true, 0, "Bearer ", 0, 7)) {
+                                            token = token.substring(7).trim();
+                                            if (token.regionMatches(true, 0, "Bearer ", 0, 7)) {
+                                                token = token.substring(7).trim();
+                                            }
+
+                                            if ((token.startsWith("\"") && token.endsWith("\""))
+                                                    || (token.startsWith("'") && token.endsWith("'"))) {
+                                                token = token.substring(1, token.length() - 1).trim();
+                                            }
+
+                                            log.info("Bearer token normalized. Length={}, prefix={}, suffix={}",
+                                                    token.length(),
+                                                    token.length() >= 12 ? token.substring(0, 12) : token,
+                                                    token.length() >= 12 ? token.substring(Math.max(0, token.length() - 12)) : token);
+                                            return token;
+                                        }
+                                    }
+
+                                    log.debug("Delegating bearer token resolution to default resolver for {} {}", request.getMethod(), request.getRequestURI());
                                     return defaultResolver.resolve(request);
                                 }
                             })

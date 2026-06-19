@@ -38,8 +38,8 @@ public class SupabaseAuthService implements AuthService {
         HttpHeaders headers = createBaseHeaders();
 
         Map<String, String> body = Map.of(
-                "email", request.getUsername(),
-                "password", request.getPassword()
+                "email", request.getEmail(),
+                "password", request.getLicenseNumber()
         );
 
         HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
