@@ -53,11 +53,19 @@ public class SupabaseAuthService implements AuthService {
 
             Map<String, Object> user = (Map<String, Object>) resp.get("user");
             String userId = (String) user.get("id");
-            Map<String, Object> metadata = (Map<String, Object>) user.get("app_metadata");
-
-            String role = (metadata != null && metadata.get("role") != null)
-                    ? metadata.get("role").toString()
-                    : "passenger";
+            
+            // Check user_metadata first (where role is stored during signup in "data" field)
+            String role = "passenger"; // default
+            Map<String, Object> userMetadata = (Map<String, Object>) user.get("user_metadata");
+            if (userMetadata != null && userMetadata.get("role") != null) {
+                role = userMetadata.get("role").toString();
+            } else {
+                // Fallback: check app_metadata
+                Map<String, Object> appMetadata = (Map<String, Object>) user.get("app_metadata");
+                if (appMetadata != null && appMetadata.get("role") != null) {
+                    role = appMetadata.get("role").toString();
+                }
+            }
 
             return AuthResponse.builder()
                     .token(token)
@@ -143,11 +151,19 @@ public class SupabaseAuthService implements AuthService {
 
         Map<String, Object> user = (Map<String, Object>) resp.get("user");
         String userId = (String) user.get("id");
-        Map<String, Object> metadata = (Map<String, Object>) user.get("app_metadata");
-
-        String role = (metadata != null && metadata.get("role") != null)
-                ? metadata.get("role").toString()
-                : "passenger";
+        
+        // Check user_metadata first (where role is stored during signup in "data" field)
+        String role = "passenger"; // default
+        Map<String, Object> userMetadata = (Map<String, Object>) user.get("user_metadata");
+        if (userMetadata != null && userMetadata.get("role") != null) {
+            role = userMetadata.get("role").toString();
+        } else {
+            // Fallback: check app_metadata
+            Map<String, Object> appMetadata = (Map<String, Object>) user.get("app_metadata");
+            if (appMetadata != null && appMetadata.get("role") != null) {
+                role = appMetadata.get("role").toString();
+            }
+        }
 
         return AuthResponse.builder()
                 .token(token)
