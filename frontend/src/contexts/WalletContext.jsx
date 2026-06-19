@@ -246,7 +246,7 @@ export function WalletProvider({ children }) {
     ])
   }
 
-  const refund = (amount, reason) => {
+  const refund = async (amount, reason) => {
     if (amount <= 0) {
       throw new Error('Refund amount must be greater than 0');
     }
@@ -255,8 +255,6 @@ export function WalletProvider({ children }) {
       setLoading(true);
       setError(null);
 
-      // The contract shows refund endpoint without request body
-      // It processes refund based on system logic
       const response = await fetch(`${API_BASE}/wallet/${userId}/refund`, {
         method: 'POST',
         headers: {
@@ -271,12 +269,10 @@ export function WalletProvider({ children }) {
       }
 
       const data = await response.json();
-      
-      // Update balance from API response
+
       setBalance(data.balance);
       saveBalanceToStorage(data.balance);
 
-      // Add transaction record
       const newTransaction = {
         id: `tx_${Date.now()}`,
         label: reason ? `Refund: ${reason}` : 'Refund',
@@ -299,7 +295,7 @@ export function WalletProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  };
+    };
 
   // Cancel booking - handles refund via API
   const cancelBooking = async (transactionId, reason) => {

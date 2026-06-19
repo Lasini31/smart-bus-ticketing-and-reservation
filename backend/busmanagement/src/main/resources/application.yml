@@ -9,15 +9,20 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: https://rpbufjokybeukqcdfumq.supabase.co/auth/v1/.well-known/jwks.json
-          jws-algorithm: ES256
+          
 
   datasource:
     url: jdbc:postgresql://db.rpbufjokybeukqcdfumq.supabase.co:5432/postgres
     username: postgres
     password: 9KMUZZV2cZ8J0HDS
-    # hikari:
-    #   maximum-pool-size: 5
-    #   minimum-idle: 1
+    
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      keepalive-time: 300000
+      connection-timeout: 30000
 
   jpa:
     hibernate:
